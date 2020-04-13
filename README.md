@@ -439,12 +439,11 @@ Step 2 - Navigate to the `Workload-Cluster` and under `Namespaces->General` clic
 Step 3 - Create a file called `tkg-cluster.yaml` with the following content:
 
 ```console
----
 apiVersion: run.tanzu.vmware.com/v1alpha1
 kind: TanzuKubernetesCluster
 metadata:
   name: tkg-cluster-1
-  namespace: veba
+  namespace: yelb
 spec:
   distribution:
     version: v1.16.8
@@ -457,6 +456,14 @@ spec:
       class: best-effort-xsmall
       count: 3
       storageClass: pacific-gold-storage-policy
+  settings:
+    network:
+      cni:
+        name: calico
+      services:
+        cidrBlocks: ["198.51.100.0/12"]
+      pods:
+        cidrBlocks: ["192.0.2.0/16"]
 ```
 
 Step 4 - Create TKG Cluster by running the following:
