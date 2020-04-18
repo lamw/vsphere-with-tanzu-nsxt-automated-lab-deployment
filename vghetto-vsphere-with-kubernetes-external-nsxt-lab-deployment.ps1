@@ -1032,8 +1032,8 @@ if($setupNewVC -eq 1) {
         My-Logger "Creating Project Pacific Storage Policies and attaching to vsanDatastore ..."
         New-TagCategory -Server $vc -Name $StoragePolicyTagCategory -Cardinality single -EntityType Datastore | Out-File -Append -LiteralPath $verboseLogFile
         New-Tag -Server $vc -Name $StoragePolicyTagName -Category $StoragePolicyTagCategory | Out-File -Append -LiteralPath $verboseLogFile
-        Get-Datastore -Server $vc -Name "vsanDatastore" | New-TagAssignment -Tag $StoragePolicyTagName | Out-File -Append -LiteralPath $verboseLogFile
-        New-SpbmStoragePolicy -Name $StoragePolicyName -AnyOfRuleSets (New-SpbmRuleSet -Name "pacific-ruleset" -AllOfRules (New-SpbmRule -AnyOfTags (Get-Tag $StoragePolicyTagName))) | Out-File -Append -LiteralPath $verboseLogFile
+        Get-Datastore -Server $vc -Name "vsanDatastore" | New-TagAssignment -Server $vc -Tag $StoragePolicyTagName | Out-File -Append -LiteralPath $verboseLogFile
+        New-SpbmStoragePolicy -Server $vc -Name $StoragePolicyName -AnyOfRuleSets (New-SpbmRuleSet -Name "pacific-ruleset" -AllOfRules (New-SpbmRule -AnyOfTags (Get-Tag $StoragePolicyTagName))) | Out-File -Append -LiteralPath $verboseLogFile
     }
 
     My-Logger "Disconnecting from new VCSA ..."
