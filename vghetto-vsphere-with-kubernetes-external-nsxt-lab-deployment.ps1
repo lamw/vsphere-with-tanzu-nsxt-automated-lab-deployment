@@ -267,142 +267,6 @@ namespace CertificateCapture
     return $thumbprint
 }
 
-Function Set-VMKeystrokes {
-    <#
-        Please see http://www.virtuallyghetto.com/2017/09/automating-vm-keystrokes-using-the-vsphere-api-powercli.html for more details
-    #>
-        param(
-            [Parameter(Mandatory=$true)][String]$VMName,
-            [Parameter(Mandatory=$true)][String]$StringInput,
-            [Parameter(Mandatory=$false)][Boolean]$ReturnCarriage,
-            [Parameter(Mandatory=$false)][Boolean]$DebugOn
-        )
-
-        # Map subset of USB HID keyboard scancodes
-        # https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
-        $hidCharacterMap = @{
-            "a"="0x04";
-            "b"="0x05";
-            "c"="0x06";
-            "d"="0x07";
-            "e"="0x08";
-            "f"="0x09";
-            "g"="0x0a";
-            "h"="0x0b";
-            "i"="0x0c";
-            "j"="0x0d";
-            "k"="0x0e";
-            "l"="0x0f";
-            "m"="0x10";
-            "n"="0x11";
-            "o"="0x12";
-            "p"="0x13";
-            "q"="0x14";
-            "r"="0x15";
-            "s"="0x16";
-            "t"="0x17";
-            "u"="0x18";
-            "v"="0x19";
-            "w"="0x1a";
-            "x"="0x1b";
-            "y"="0x1c";
-            "z"="0x1d";
-            "1"="0x1e";
-            "2"="0x1f";
-            "3"="0x20";
-            "4"="0x21";
-            "5"="0x22";
-            "6"="0x23";
-            "7"="0x24";
-            "8"="0x25";
-            "9"="0x26";
-            "0"="0x27";
-            "!"="0x1e";
-            "@"="0x1f";
-            "#"="0x20";
-            "$"="0x21";
-            "%"="0x22";
-            "^"="0x23";
-            "&"="0x24";
-            "*"="0x25";
-            "("="0x26";
-            ")"="0x27";
-            "_"="0x2d";
-            "+"="0x2e";
-            "{"="0x2f";
-            "}"="0x30";
-            "|"="0x31";
-            ":"="0x33";
-            "`""="0x34";
-            "~"="0x35";
-            "<"="0x36";
-            ">"="0x37";
-            "?"="0x38";
-            "-"="0x2d";
-            "="="0x2e";
-            "["="0x2f";
-            "]"="0x30";
-            "\"="0x31";
-            "`;"="0x33";
-            "`'"="0x34";
-            ","="0x36";
-            "."="0x37";
-            "/"="0x38";
-            " "="0x2c";
-        }
-
-        $vm = Get-View -ViewType VirtualMachine -Filter @{"Name"=$VMName}
-
-        # Verify we have a VM or fail
-        if(!$vm) {
-            Write-host "Unable to find VM $VMName"
-            return
-        }
-
-        $hidCodesEvents = @()
-        foreach($character in $StringInput.ToCharArray()) {
-            # Check to see if we've mapped the character to HID code
-            if($hidCharacterMap.ContainsKey([string]$character)) {
-                $hidCode = $hidCharacterMap[[string]$character]
-
-                $tmp = New-Object VMware.Vim.UsbScanCodeSpecKeyEvent
-
-                # Add leftShift modifer for capital letters and/or special characters
-                if( ($character -cmatch "[A-Z]") -or ($character -match "[!|@|#|$|%|^|&|(|)|_|+|{|}|||:|~|<|>|?]") ) {
-                    $modifer = New-Object Vmware.Vim.UsbScanCodeSpecModifierType
-                    $modifer.LeftShift = $true
-                    $tmp.Modifiers = $modifer
-                }
-
-                # Convert to expected HID code format
-                $hidCodeHexToInt = [Convert]::ToInt64($hidCode,"16")
-                $hidCodeValue = ($hidCodeHexToInt -shl 16) -bor 0007
-
-                $tmp.UsbHidCode = $hidCodeValue
-                $hidCodesEvents+=$tmp
-            } else {
-                My-Logger Write-Host "The following character `"$character`" has not been mapped, you will need to manually process this character"
-                break
-            }
-        }
-
-        # Add return carriage to the end of the string input (useful for logins or executing commands)
-        if($ReturnCarriage) {
-            # Convert return carriage to HID code format
-            $hidCodeHexToInt = [Convert]::ToInt64("0x28","16")
-            $hidCodeValue = ($hidCodeHexToInt -shl 16) + 7
-
-            $tmp = New-Object VMware.Vim.UsbScanCodeSpecKeyEvent
-            $tmp.UsbHidCode = $hidCodeValue
-            $hidCodesEvents+=$tmp
-        }
-
-        # Call API to send keystrokes to VM
-        $spec = New-Object Vmware.Vim.UsbScanCodeSpec
-        $spec.KeyEvents = $hidCodesEvents
-        $results = $vm.PutUsbScanCodes($spec)
-}
-
 Function My-Logger {
     param(
     [Parameter(Mandatory=$true)]
@@ -786,12 +650,6 @@ if($deployVCSA -eq 1) {
         $config.'new_vcsa'.sso.password = $VCSASSOPassword
         $config.'new_vcsa'.sso.domain_name = $VCSASSODomainName
 
-        #$featureFlags = [pscustomobject] @{
-        #    "prop:guestinfo.cis.feature.states" = "NSX_Integrated=disabled";
-        #    "X:enableHiddenProperties" = "";
-        #}
-        #$config.new_vcsa | Add-Member -MemberType NoteProperty -Name "ovftool_arguments" -Value $featureFlags
-
         if($IsWindows) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
             $config | ConvertTo-Json | Set-Content -Path "$($ENV:Temp)\jsontemplate.json"
@@ -814,10 +672,9 @@ if($deployVCSA -eq 1) {
 }
 
 if($deployNSXEdge -eq 1) {
-    <#
     My-Logger "Setting up NSX-T Edge to join NSX-T Management Plane ..."
     if(!(Connect-NsxtServer -Server $NSXTMgrHostname -Username $NSXAdminUsername -Password $NSXAdminPassword -WarningAction SilentlyContinue)) {
-        Write-Host -ForegroundColor Red "Unable to connect to NSX Manager, please check the deployment"
+        Write-Host -ForegroundColor Red "Unable to connect to NSX-T Manager, please check the deployment"
         exit
     } else {
         My-Logger "Successfully logged into NSX-T Manager $NSXTMgrHostname  ..."
@@ -828,12 +685,17 @@ if($deployNSXEdge -eq 1) {
     $nsxMgrID = ((Get-NsxtService -Name "com.vmware.nsx.cluster.nodes").list().results | where {$_.manager_role -ne $null}).id
     $nsxMgrCertThumbprint = (Get-NsxtService -Name "com.vmware.nsx.cluster.nodes").get($nsxMgrID).manager_role.api_listen_addr.certificate_sha256_thumbprint
 
-    $tokenRegService = Get-NsxtService "com.vmware.nsx.aaa.registration_token"
-    $token = ($tokenRegService.create()).token
+    My-Logger "Accepting NSX Manager EULA ..."
+    $eulaService = Get-NsxtService -Name "com.vmware.nsx.eula.accept"
+    $eulaService.create()
+
+    $LicenseService = Get-NsxtService -Name "com.vmware.nsx.licenses"
+    $LicenseSpec = $LicenseService.Help.create.license.Create()
+    $LicenseSpec.license_key = $NSXLicenseKey
+    $LicenseResult = $LicenseService.create($LicenseSpec)
 
     My-Logger "Disconnecting from NSX-T Manager ..."
     Disconnect-NsxtServer -Confirm:$false
-    #>
 
     # Deploy Edges
     $nsxEdgeOvfConfig = Get-OvfConfiguration $NSXTEdgeOVA
@@ -856,9 +718,10 @@ if($deployNSXEdge -eq 1) {
         $nsxEdgeOvfConfig.Common.nsx_domain_0.Value = $VMDomain
         $nsxEdgeOvfConfig.Common.nsx_ntp_0.Value = $VMNTP
 
-        #$nsxEdgeOvfConfig.Common.mpNodeId.Value = $nsxMgrID
-        #$nsxEdgeOvfConfig.Common.mpIp.Value = $NSXTMgrIPAddress
-        #$nsxEdgeOvfConfig.Common.mpThumbprint.Value = $nsxMgrCertThumbprint
+        $nsxEdgeOvfConfig.Common.mpUser.Value = $NSXAdminUsername
+        $nsxEdgeOvfConfig.Common.mpPassword.Value = $NSXAdminPassword
+        $nsxEdgeOvfConfig.Common.mpIp.Value = $NSXTMgrIPAddress
+        $nsxEdgeOvfConfig.Common.mpThumbprint.Value = $nsxMgrCertThumbprint
 
         if($NSXSSHEnable -eq "true") {
             $NSXSSHEnableVar = $true
@@ -1050,9 +913,6 @@ if($postDeployNSXConfig -eq 1) {
     }
 
     $runHealth=$true
-    $runEULA=$true
-    $runLicense=$true
-    $runEdgeJoin=$true
     $runCEIP=$true
     $runAddVC=$true
     $runIPPool=$true
@@ -1098,77 +958,12 @@ if($postDeployNSXConfig -eq 1) {
         }
     }
 
-    if($runEULA) {
-        My-Logger "Accepting NSX Manager EULA ..."
-        $eulaService = Get-NsxtService -Name "com.vmware.nsx.eula.accept"
-        $eulaService.create()
-    }
-
-    if($runLicense) {
-        $LicenseService = Get-NsxtService -Name "com.vmware.nsx.licenses"
-        $LicenseSpec = $LicenseService.Help.create.license.Create()
-        $LicenseSpec.license_key = $NSXLicenseKey
-        $LicenseResult = $LicenseService.create($LicenseSpec)
-    }
-
     if($runCEIP) {
         My-Logger "Accepting CEIP Agreement ..."
         $ceipAgreementService = Get-NsxtService -Name "com.vmware.nsx.telemetry.agreement"
         $ceipAgreementSpec = $ceipAgreementService.get()
         $ceipAgreementSpec.telemetry_agreement_displayed = $true
         $agreementResult = $ceipAgreementService.update($ceipAgreementSpec)
-    }
-
-    if($runEdgeJoin -eq 1) {
-        My-Logger "Setting up NSX-T Edge to join NSX-T Management Plane ..."
-
-        My-Logger "Connecting back to Management vCenter Server $VIServer ..."
-        Connect-VIServer $VIServer -User $VIUsername -Password $VIPassword -WarningAction SilentlyContinue | Out-Null
-
-        # Retrieve NSX Manager Thumbprint which will be needed later
-        My-Logger "Retrieving NSX Manager Thumbprint ..."
-        $nsxMgrID = ((Get-NsxtService -Name "com.vmware.nsx.cluster.nodes").list().results | where {$_.manager_role -ne $null}).id
-        $nsxMgrCertThumbprint = (Get-NsxtService -Name "com.vmware.nsx.cluster.nodes").get($nsxMgrID).manager_role.api_listen_addr.certificate_sha256_thumbprint
-
-        ### Setup NSX Edges
-        $NSXTEdgeHostnameToIPs.GetEnumerator() | Sort-Object -Property Value | Foreach-Object {
-            $nsxEdgeName = $_.name
-            $nsxEdgeIp = $_.value
-
-            My-Logger "Configuring NSX Edge $nsxEdgeName ..."
-
-            # Login by passing in admin username <enter>
-            if($debug) { My-Logger "Sending admin username ..." }
-            Set-VMKeystrokes -VMName $nsxEdgeName -StringInput $NSXAdminUsername -ReturnCarriage $true
-            Start-Sleep 2
-
-            # Login by passing in admin password <enter>
-            if($debug) { My-Logger "Sending admin password ..." }
-            Set-VMKeystrokes -VMName $nsxEdgeName -StringInput $NSXAdminPassword -ReturnCarriage $true
-            Start-Sleep 5
-
-            # Setting Hostname since OVF properties don't do this automatically :(
-            if($debug) { My-Logger "Sending set hostname command ..." }
-            $hostnameCmd = "set hostname $nsxEdgeName"
-            Set-VMKeystrokes -VMName $nsxEdgeName -StringInput $hostnameCmd -ReturnCarriage $true
-            Start-Sleep 10
-
-            # Join NSX Edge to NSX Manager
-            if($debug) { My-Logger "Sending join management plane command ..." }
-            $joinMgmtCmd1 = "join management-plane $NSXTMgrIPAddress username $NSXAdminUsername thumbprint $nsxMgrCertThumbprint"
-            $joinMgmtCmd2 = "$NSXAdminPassword"
-            Set-VMKeystrokes -VMName $nsxEdgeName -StringInput $joinMgmtCmd1 -ReturnCarriage $true
-            Start-Sleep 5
-            Set-VMKeystrokes -VMName $nsxEdgeName -StringInput $joinMgmtCmd2 -ReturnCarriage $true
-            Start-Sleep 20
-
-            # Exit Console
-            if($debug) { My-Logger "Sending final exit ..." }
-            Set-VMKeystrokes -VMName $nsxEdgeName -StringInput "exit" -ReturnCarriage $true
-        }
-
-        My-Logger "Disconnecting from Management vCenter ..."
-        Disconnect-VIServer * -Confirm:$false
     }
 
     if($runAddVC) {
