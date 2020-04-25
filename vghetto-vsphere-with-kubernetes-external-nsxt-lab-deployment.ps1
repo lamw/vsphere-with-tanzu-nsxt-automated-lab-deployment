@@ -710,7 +710,7 @@ if($deployNSXEdge -eq 1) {
     $NSXTEdgeHostnameToIPs.GetEnumerator() | Sort-Object -Property Value | Foreach-Object {
         $VMName = $_.Key
         $VMIPAddress = $_.Value
-        $VMHostname = "$VMName" + "@" + $VMDomain
+        $VMHostname = "$VMName" + "." + $VMDomain
 
         $nsxEdgeOvfConfig.DeploymentOption.Value = $NSXTEdgeDeploymentSize
         $nsxEdgeOvfConfig.NetworkMapping.Network_0.value = $VMNetwork
