@@ -473,6 +473,8 @@ spec:
         cidrBlocks: ["198.51.100.0/12"]
       pods:
         cidrBlocks: ["192.0.2.0/16"]
+    storage:
+      defaultClass: pacific-gold-storage-policy
 ```
 
 Step 4 - Create TKG Cluster by running the following:
