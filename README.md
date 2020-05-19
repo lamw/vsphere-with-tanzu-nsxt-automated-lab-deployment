@@ -105,6 +105,10 @@ You are now ready to get your K8s on! 😁
 
     * Please refer to this [troubleshooting tips for vSphere with Kubernetes](https://www.virtuallyghetto.com/2020/05/troubleshooting-tips-for-configuring-vsphere-with-kubernetes.html) blog post
 
+8) Is there a way to automate the enablement of Workload Management to a vSphere Cluster?
+
+    * Yes, please see [Workload Management PowerCLI Module for automating vSphere with Kubernetes](https://www.virtuallyghetto.com/2020/05/workload-management-powercli-module-for-automating-vsphere-with-kubernetes.html) blog post for more details.
+
 ## Configuration
 
 Before you can run the script, you will need to edit the script and update a number of variables to match your deployment environment. Details on each section is described below including actual values used in my home lab environment.

@@ -110,6 +110,7 @@ $T0GatewayInterfaceStaticRouteAddress = "172.17.31.253"
 $ESXiUplinkProfileName = "ESXi-Host-Uplink-Profile"
 $ESXiUplinkProfilePolicy = "FAILOVER_ORDER"
 $ESXiUplinkName = "uplink1"
+$ESXiUplinkProfileTransportVLAN = "0"
 
 $EdgeUplinkProfileName = "Edge-Uplink-Profile"
 $EdgeUplinkProfilePolicy = "FAILOVER_ORDER"
