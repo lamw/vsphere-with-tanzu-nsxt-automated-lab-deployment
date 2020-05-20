@@ -28,6 +28,9 @@ You are now ready to get your K8s on! 😁
 
 ## Changelog
 
+* **04/27/2020**
+  * Enable minimum vSphere with K8s Deployment. Please see this [blog post](https://www.virtuallyghetto.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
+
 * **04/13/2020**
   * Initial Release
 
@@ -68,6 +71,8 @@ You are now ready to get your K8s on! 😁
 
     * You can, but it is highly recommended to leave the current defaults for the best working experience. For non-vSphere with Kubernetes usage, you can certainly tune down the resources. For vSphere Pod usage, it is possible to deploy the NSX-T Edge with just 4 vCPU, however if you are going to deploy TKG Clusters, you will need 8 vCPUs on the NSX-T Edge for proper functionality. For memory resources, you can reduce the ESXi VM memory to 16GB but if you intend to deploy K8s application/workloads, you will want to keep the default. For NSX-T memory, I have seen cases where system will become unresponsive and although you can probably tune it down a bit more, I would strongly suggest you keep the defaults unless you plan to do exhaustive testing to ensure there is no negative impact.
 
+    **UPDATE (04/27/20)**: Please see this [blog post](https://www.virtuallyghetto.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
+
 3) Can I just deploy vSphere (VCSA, ESXi) and vSAN without NSX-T and vSphere with Kubernetes?
 
     * Yes, simply search for the following variables and change their values to `0` to not deploy NSX-T components or run through the configurations
@@ -95,6 +100,14 @@ You are now ready to get your K8s on! 😁
 6) How do I enable vSphere with Kubernetes after the script has completed?
 
     * Please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-287138F0-1FFD-4774-BBB9-A1FAB932D1C4.html) with the instructions
+
+7) How do I troubleshoot enabling or consuming vSphere with Kubernetes?
+
+    * Please refer to this [troubleshooting tips for vSphere with Kubernetes](https://www.virtuallyghetto.com/2020/05/troubleshooting-tips-for-configuring-vsphere-with-kubernetes.html) blog post
+
+8) Is there a way to automate the enablement of Workload Management to a vSphere Cluster?
+
+    * Yes, please see [Workload Management PowerCLI Module for automating vSphere with Kubernetes](https://www.virtuallyghetto.com/2020/05/workload-management-powercli-module-for-automating-vsphere-with-kubernetes.html) blog post for more details.
 
 ## Configuration
 
@@ -464,6 +477,8 @@ spec:
         cidrBlocks: ["198.51.100.0/12"]
       pods:
         cidrBlocks: ["192.0.2.0/16"]
+    storage:
+      defaultClass: pacific-gold-storage-policy
 ```
 
 Step 4 - Create TKG Cluster by running the following:
