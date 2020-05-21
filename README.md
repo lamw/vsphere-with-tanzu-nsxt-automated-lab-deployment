@@ -35,7 +35,7 @@ You are now ready to get your K8s on! 😁
   * Initial Release
 
 ## Requirements
-* vCenter Server running at least vSphere 6.7 or later
+* vCenter Server running at least vSphere 7 or later
     * If your physical storage is vSAN, please ensure you've applied the following setting as mentioned [here](https://www.virtuallyghetto.com/2013/11/how-to-run-nested-esxi-on-top-of-vsan.html)
 * Resource Requirements
     * Compute
