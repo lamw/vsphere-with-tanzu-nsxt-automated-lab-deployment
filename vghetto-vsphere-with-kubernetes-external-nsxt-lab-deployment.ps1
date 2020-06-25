@@ -51,7 +51,6 @@ $VMSyslog = "172.17.31.112"
 $VMFolder = "Project-Pacific"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
-$VMVMFS = "false"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
 $NewVCDatacenterName = "Pacific-Datacenter"
