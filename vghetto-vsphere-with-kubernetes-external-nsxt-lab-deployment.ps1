@@ -401,8 +401,6 @@ if($confirmDeployment -eq 1) {
     Write-Host -ForegroundColor White $VMSyslog
     Write-Host -NoNewline -ForegroundColor Green "Enable SSH: "
     Write-Host -ForegroundColor White $VMSSH
-    Write-Host -NoNewline -ForegroundColor Green "Create VMFS Volume: "
-    Write-Host -ForegroundColor White $VMVMFS
 
     Write-Host -ForegroundColor Yellow "`n---- VCSA Configuration ----"
     Write-Host -NoNewline -ForegroundColor Green "Deployment Size: "
