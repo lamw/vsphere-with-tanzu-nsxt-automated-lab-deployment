@@ -7,10 +7,10 @@ $VIUsername = "administrator@vsphere.local"
 $VIPassword = "VMware1!"
 
 # Full Path to both the Nested ESXi 7.0 VA, Extracted VCSA 7.0 ISO & NSX-T OVAs
-$NestedESXiApplianceOVA = "C:\Users\william\Desktop\Project-Pacific\Nested_ESXi7.0_Appliance_Template_v1.ova"
-$VCSAInstallerPath = "C:\Users\william\Desktop\Project-Pacific\VMware-VCSA-all-7.0.0-15952498"
-$NSXTManagerOVA = "C:\Users\william\Desktop\Project-Pacific\nsx-unified-appliance-3.0.0.0.0.15946739.ova"
-$NSXTEdgeOVA = "C:\Users\william\Desktop\Project-Pacific\nsx-edge-3.0.0.0.0.15946012.ova"
+$NestedESXiApplianceOVA = "C:\Users\william\Desktop\Tanzu\Nested_ESXi7.0u1_Appliance_Template_v1.ova"
+$VCSAInstallerPath = "C:\Users\william\Desktop\Tanzu\VMware-VCSA-all-7.0.1-16860138"
+$NSXTManagerOVA = "C:\Users\william\Desktop\Tanzu\nsx-unified-appliance-3.1.1.0.0.17483186.ova"
+$NSXTEdgeOVA = "C:\Users\william\Desktop\Tanzu\nsx-edge-3.1.1.0.0.17483065.ova"
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
@@ -147,9 +147,9 @@ $addHostByDnsName = 1
 #### DO NOT EDIT BEYOND HERE ####
 
 $debug = $true
-$verboseLogFile = "pacific-nsxt-external-vghetto-lab-deployment.log"
+$verboseLogFile = "vsphere-with-tanzu-nsxt-lab-deployment.log"
 $random_string = -join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_})
-$VAppName = "vGhetto-Nested-Project-Pacific-NSX-T-External-Lab-$random_string"
+$VAppName = "Nested-vSphere-with-Tanzu-NSX-T-Lab-$random_string"
 
 $preCheck = 1
 $confirmDeployment = 1
@@ -1357,7 +1357,7 @@ if($postDeployNSXConfig -eq 1) {
         $edgeClusterService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters"
 
         $edgeCluster = ($edgeClusterService.list().results | where {$_.display_name -eq $EdgeClusterName})
-        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.transport_node_id
+        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.member_index
         if($debug) { "EdgeClusterMember: ${edgeClusterMember}" | Out-File -Append -LiteralPath $verboseLogFile }
 
         $policyEdgeCluster = ($edgeClusterPolicyService.list("default","default").results | where {$_.display_name -eq $EdgeClusterName})
@@ -1451,7 +1451,7 @@ if($setupPacific -eq 1) {
 $EndTime = Get-Date
 $duration = [math]::Round((New-TimeSpan -Start $StartTime -End $EndTime).TotalMinutes,2)
 
-My-Logger "vSphere with Kubernetes External NSX-T Lab Deployment Complete!"
+My-Logger "vSphere with Tanzu using NSX-T Lab Deployment Complete!"
 My-Logger "StartTime: $StartTime"
 My-Logger "  EndTime: $EndTime"
 My-Logger " Duration: $duration minutes"

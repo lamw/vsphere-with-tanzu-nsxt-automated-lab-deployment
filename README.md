@@ -28,6 +28,10 @@ You are now ready to get your K8s on! 😁
 
 ## Changelog
 
+* **02/21/2021**
+  * Verified support for vSphere 7.0 Update 1 & NSX-T 3.1
+  * Fix T0 Interface creation due to API changes with NSX-T
+
 * **04/27/2020**
   * Enable minimum vSphere with K8s Deployment. Please see this [blog post](https://www.virtuallyghetto.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
 
@@ -57,10 +61,10 @@ You are now ready to get your K8s on! 😁
 * [VMware Cloud Foundation Licenses](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-9A190942-BDB1-4A19-BA09-728820A716F2.html)
 * Desktop (Windows, Mac or Linux) with latest PowerShell Core and PowerCLI 12.0 Core installed. See [ instructions here](https://blogs.vmware.com/PowerCLI/2018/03/installing-powercli-10-0-0-macos.html) for more details
 * vSphere 7 & NSX-T OVAs:
-    * [vCenter Server Appliance 7.0 Build 15952498](https://my.vmware.com/web/vmware/details?downloadGroup=VC700&productId=974&rPId=45006)
-    * [NSX-T Unified Appliance 3.0 OVA - Build 15946738](https://my.vmware.com/group/vmware/details?downloadGroup=NSX-T-300&productId=982&download=true&fileId=35e89f7fce7f0681258656c9b16ebc5d&secureParam=3e43a22a12477bcae462c37d09677dd2&uuId=724599c8-41c9-47ca-8995-eda318eda20e&downloadType=)
-    * [NSX-T Edge 3.0 OVA - Build 15946738](https://my.vmware.com/group/vmware/details?downloadGroup=NSX-T-300&productId=982&download=true&fileId=7ca3ab9202b39d92b805d5414628215a&secureParam=833ac1e89d29baa2c62c274d5fc072f7&uuId=f79fbe81-d12e-4403-b0c5-e8f76aa5621e&downloadType=)
-    * [Nested ESXi 7.0 OVA - Build 15344619](https://download3.vmware.com/software/vmw-tools/nested-esxi/Nested_ESXi7.0_Appliance_Template_v1.ova)
+    * [vCenter Server Appliance 7.0 Update 1 Build 17491101](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=VC70U1D&productId=974&rPId=60903)
+    * [NSX-T Unified Appliance 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
+    * [NSX-T Edge 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
+    * [Nested ESXi 7.0 Update 1 OVA - Build 15344619](https://download3.vmware.com/software/vmw-tools/nested-esxi/Nested_ESXi7.0u1_Appliance_Template_v1.ova)
 
 ## FAQ
 
