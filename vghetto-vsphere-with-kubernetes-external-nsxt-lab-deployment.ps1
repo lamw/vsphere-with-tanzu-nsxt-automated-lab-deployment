@@ -14,9 +14,9 @@ $NSXTEdgeOVA = "C:\Users\william\Desktop\Tanzu\nsx-edge-3.1.1.0.0.17483065.ova"
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
-    "pacific-esxi-7" = "172.17.31.113"
-    "pacific-esxi-8" = "172.17.31.114"
-    "pacific-esxi-9" = "172.17.31.115"
+    "tanzu-esxi-7" = "172.17.31.113"
+    "tanzu-esxi-8" = "172.17.31.114"
+    "tanzu-esxi-9" = "172.17.31.115"
 }
 
 # Nested ESXi VM Resources
@@ -27,9 +27,9 @@ $NestedESXiCapacityvDisk = "100" #GB
 
 # VCSA Deployment Configuration
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "pacific-vcsa-3"
+$VCSADisplayName = "tanzu-vcsa-3"
 $VCSAIPAddress = "172.17.31.112"
-$VCSAHostname = "pacific-vcsa-3.cpbu.corp" #Change to IP if you don't have valid DNS
+$VCSAHostname = "tanzu-vcsa-3.cpbu.corp" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "24"
 $VCSASSODomainName = "vsphere.local"
 $VCSASSOPassword = "VMware1!"
@@ -48,21 +48,21 @@ $VMNTP = "pool.ntp.org"
 $VMPassword = "VMware1!"
 $VMDomain = "cpbu.corp"
 $VMSyslog = "172.17.31.112"
-$VMFolder = "Project-Pacific"
+$VMFolder = "Tanzu"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
 $VMVMFS = "false"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
-$NewVCDatacenterName = "Pacific-Datacenter"
+$NewVCDatacenterName = "Tanzu-Datacenter"
 $NewVCVSANClusterName = "Workload-Cluster"
-$NewVCVDSName = "Pacific-VDS"
+$NewVCVDSName = "Tanzu-VDS"
 $NewVCDVPGName = "DVPG-Management Network"
 
-# Pacific Configuration
-$StoragePolicyName = "pacific-gold-storage-policy"
-$StoragePolicyTagCategory = "pacific-demo-tag-category"
-$StoragePolicyTagName = "pacific-demo-storage"
+# Tanzu Configuration
+$StoragePolicyName = "tanzu-gold-storage-policy"
+$StoragePolicyTagCategory = "tanzu-demo-tag-category"
+$StoragePolicyTagName = "tanzu-demo-storage"
 $DevOpsUsername = "devops"
 $DevOpsPassword = "VMware1!"
 
@@ -75,10 +75,10 @@ $NSXAuditUsername = "audit"
 $NSXAuditPassword = "VMware1!VMware1!"
 $NSXSSHEnable = "true"
 $NSXEnableRootLogin = "true"
-$NSXVTEPNetwork = "Pacific-VTEP"
+$NSXVTEPNetwork = "Tanzu-VTEP" # This portgroup needs be created before running script
 
 # Transport Node Profile
-$TransportNodeProfileName = "Pacific-Host-Transport-Node-Profile"
+$TransportNodeProfileName = "Tanzu-Host-Transport-Node-Profile"
 
 # TEP IP Pool
 $TunnelEndpointName = "TEP-IP-Pool"
@@ -95,14 +95,14 @@ $VlanTransportZoneName = "TZ-VLAN"
 $VlanTransportZoneNameHostSwitchName = "edgeswitch"
 
 # Network Segment
-$NetworkSegmentName = "Pacific-Segment"
+$NetworkSegmentName = "Tanzu-Segment"
 $NetworkSegmentVlan = "0"
 
 # T0 Gateway
-$T0GatewayName = "Pacific-T0-Gateway"
+$T0GatewayName = "Tanzu-T0-Gateway"
 $T0GatewayInterfaceAddress = "172.17.31.119" # should be a routable address
 $T0GatewayInterfacePrefix = "24"
-$T0GatewayInterfaceStaticRouteName = "Pacific-Static-Route"
+$T0GatewayInterfaceStaticRouteName = "Tanzu-Static-Route"
 $T0GatewayInterfaceStaticRouteNetwork = "0.0.0.0/0"
 $T0GatewayInterfaceStaticRouteAddress = "172.17.31.253"
 
@@ -128,8 +128,8 @@ $EdgeClusterName = "Edge-Cluster-01"
 $NSXTMgrDeploymentSize = "small"
 $NSXTMgrvCPU = "6" #override default size
 $NSXTMgrvMEM = "24" #override default size
-$NSXTMgrDisplayName = "pacific-nsx-3"
-$NSXTMgrHostname = "pacific-nsx-3.cpbu.corp"
+$NSXTMgrDisplayName = "tanzu-nsx-3"
+$NSXTMgrHostname = "tanzu-nsx-3.cpbu.corp"
 $NSXTMgrIPAddress = "172.17.31.118"
 
 # NSX-T Edge Configuration
@@ -137,7 +137,7 @@ $NSXTEdgeDeploymentSize = "medium"
 $NSXTEdgevCPU = "8" #override default size
 $NSXTEdgevMEM = "32" #override default size
 $NSXTEdgeHostnameToIPs = @{
-    "pacific-nsx-edge-3a" = "172.17.31.116"
+    "tanzu-nsx-edge-3a" = "172.17.31.116"
 }
 
 # Advanced Configurations
@@ -160,11 +160,12 @@ $addESXiHostsToVC = 1
 $configureVSANDiskGroup = 1
 $configureVDS = 1
 $clearVSANHealthCheckAlarm = 1
-$setupPacificStoragePolicy = 1
+$setupTanzuStoragePolicy = 1
+$setupTKGContentLibrary = 1
 $deployNSXManager = 1
 $deployNSXEdge = 1
 $postDeployNSXConfig = 1
-$setupPacific = 1
+$setupTanzu = 0
 $moveVMsIntovApp = 1
 
 $vcsaSize2MemoryStorageMap = @{
@@ -194,6 +195,77 @@ $nsxManagerTotalStorage = 0
 $nsxEdgeTotalStorage = 0
 
 $StartTime = Get-Date
+
+Function Get-SSLThumbprint {
+    param(
+    [Parameter(
+        Position=0,
+        Mandatory=$true,
+        ValueFromPipeline=$true,
+        ValueFromPipelineByPropertyName=$true)
+    ]
+    [Alias('FullName')]
+    [String]$URL
+    )
+
+    $Code = @'
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+namespace CertificateCapture
+{
+    public class Utility
+    {
+        public static Func<HttpRequestMessage,X509Certificate2,X509Chain,SslPolicyErrors,Boolean> ValidationCallback =
+            (message, cert, chain, errors) => {
+                var newCert = new X509Certificate2(cert);
+                var newChain = new X509Chain();
+                newChain.Build(newCert);
+                CapturedCertificates.Add(new CapturedCertificate(){
+                    Certificate =  newCert,
+                    CertificateChain = newChain,
+                    PolicyErrors = errors,
+                    URI = message.RequestUri
+                });
+                return true;
+            };
+        public static List<CapturedCertificate> CapturedCertificates = new List<CapturedCertificate>();
+    }
+    public class CapturedCertificate
+    {
+        public X509Certificate2 Certificate { get; set; }
+        public X509Chain CertificateChain { get; set; }
+        public SslPolicyErrors PolicyErrors { get; set; }
+        public Uri URI { get; set; }
+    }
+}
+'@
+    if ($PSEdition -ne 'Core'){
+        Add-Type -AssemblyName System.Net.Http
+        if (-not ("CertificateCapture" -as [type])) {
+            try { Add-Type $Code -ReferencedAssemblies System.Net.Http } catch {}
+        }
+    } else {
+        if (-not ("CertificateCapture" -as [type])) {
+            try { Add-Type $Code -ErrorAction SilentlyContinue } catch {}
+        }
+    }
+
+    $Certs = [CertificateCapture.Utility]::CapturedCertificates
+
+    $Handler = [System.Net.Http.HttpClientHandler]::new()
+    $Handler.ServerCertificateCustomValidationCallback = [CertificateCapture.Utility]::ValidationCallback
+    $Client = [System.Net.Http.HttpClient]::new($Handler)
+    $Result = $Client.GetAsync($Url).Result
+
+    $sha1 = [Security.Cryptography.SHA1]::Create()
+    $certBytes = $Certs[-1].Certificate.GetRawCertData()
+    $hash = $sha1.ComputeHash($certBytes)
+    $thumbprint = [BitConverter]::ToString($hash).Replace('-',':')
+    return $thumbprint.toLower()
+}
 
 Function Get-SSLThumbprint256 {
     param(
@@ -246,11 +318,11 @@ namespace CertificateCapture
     if ($PSEdition -ne 'Core'){
         Add-Type -AssemblyName System.Net.Http
         if (-not ("CertificateCapture" -as [type])) {
-            Add-Type $Code -ReferencedAssemblies System.Net.Http
+            try { Add-Type $Code -ReferencedAssemblies System.Net.Http } catch {}
         }
     } else {
         if (-not ("CertificateCapture" -as [type])) {
-            Add-Type $Code
+            try { Add-Type $Code -ErrorAction SilentlyContinue } catch {}
         }
     }
 
@@ -344,7 +416,7 @@ if($preCheck -eq 1) {
 if($confirmDeployment -eq 1) {
     Write-Host -ForegroundColor Magenta "`nPlease confirm the following configuration will be deployed:`n"
 
-    Write-Host -ForegroundColor Yellow "---- vSphere with Kubernetes External NSX-T Automated Lab Deployment Configuration ---- "
+    Write-Host -ForegroundColor Yellow "---- vSphere with Tanzu using NSX-T Automated Lab Deployment Configuration ---- "
     Write-Host -NoNewline -ForegroundColor Green "Nested ESXi Image Path: "
     Write-Host -ForegroundColor White $NestedESXiApplianceOVA
     Write-Host -NoNewline -ForegroundColor Green "VCSA Image Path: "
@@ -895,6 +967,8 @@ if($setupNewVC -eq 1) {
         }
         $alarmSpec = New-Object VMware.Vim.AlarmFilterSpec
         $alarmMgr.ClearTriggeredAlarms($alarmSpec)
+        
+        Set-VsanClusterConfiguration -Configuration $NewVCVSANClusterName -AddSilentHealthCheck controlleronhcl,vumconfig,vumrecommendation -PerformanceServiceEnabled $true
     }
 
     # Final configure and then exit maintanence mode in case patching was done earlier
@@ -910,17 +984,27 @@ if($setupNewVC -eq 1) {
         }
     }
 
-    if($setupPacificStoragePolicy) {
+    if($setupTanzuStoragePolicy) {
         if($configureVSANDiskGroup -eq 1) {
             $datastoreName = "vsanDatastore"
         } else {
             $datastoreName = ((Get-Cluster -Server $vc | Get-VMHost | Select -First 1 | Get-Datastore) | where {$_.type -eq "VMFS"}).name
         }
-        My-Logger "Creating Project Pacific Storage Policies and attaching to $datastoreName ..."
+        My-Logger "Creating Tanzu Storage Policies and attaching to $datastoreName ..."
         New-TagCategory -Server $vc -Name $StoragePolicyTagCategory -Cardinality single -EntityType Datastore | Out-File -Append -LiteralPath $verboseLogFile
         New-Tag -Server $vc -Name $StoragePolicyTagName -Category $StoragePolicyTagCategory | Out-File -Append -LiteralPath $verboseLogFile
         Get-Datastore -Server $vc -Name $datastoreName | New-TagAssignment -Server $vc -Tag $StoragePolicyTagName | Out-File -Append -LiteralPath $verboseLogFile
-        New-SpbmStoragePolicy -Server $vc -Name $StoragePolicyName -AnyOfRuleSets (New-SpbmRuleSet -Name "pacific-ruleset" -AllOfRules (New-SpbmRule -AnyOfTags (Get-Tag $StoragePolicyTagName))) | Out-File -Append -LiteralPath $verboseLogFile
+        New-SpbmStoragePolicy -Server $vc -Name $StoragePolicyName -AnyOfRuleSets (New-SpbmRuleSet -Name "tanzu-ruleset" -AllOfRules (New-SpbmRule -AnyOfTags (Get-Tag $StoragePolicyTagName))) | Out-File -Append -LiteralPath $verboseLogFile
+    }
+
+    if ($setupTKGContentLibrary -eq 1) {
+        My-Logger "Creating TKG Subscribed Content Library $TKGContentLibraryName ..."
+        $clScheme = ([System.Uri]$TKGContentLibraryURL).scheme
+        $clHost = ([System.Uri]$TKGContentLibraryURL).host
+        $clPort = ([System.Uri]$TKGContentLibraryURL).port
+        $clThumbprint = Get-SSLThumbprint -Url "${clScheme}://${clHost}:${clPort}"
+
+        New-ContentLibrary -Server $vc -Name $TKGContentLibraryName -Description "Subscribed TKG Content Library" -Datastore (Get-Datastore -Server $vc "vsanDatastore") -AutomaticSync -SubscriptionUrl $TKGContentLibraryURL -SslThumbprint $clThumbprint | Out-File -Append -LiteralPath $verboseLogFile
     }
 
     My-Logger "Disconnecting from new VCSA ..."
@@ -949,7 +1033,7 @@ if($postDeployNSXConfig -eq 1) {
     $runNetworkSegment=$true
     $runT0Gateway=$true
     $runT0StaticRoute=$true
-    $registervCenterOIDC=$true
+    $registervCenterOIDC=$false
 
     if($runHealth) {
         My-Logger "Verifying health of all NSX Manager/Controller Nodes ..."
@@ -992,11 +1076,11 @@ if($postDeployNSXConfig -eq 1) {
 
     if($runAddVC) {
         My-Logger "Adding vCenter Server Compute Manager ..."
-        $computeManagerSerivce = Get-NsxtService -Name "com.vmware.nsx.fabric.compute_managers"
+        $computeManagerService = Get-NsxtService -Name "com.vmware.nsx.fabric.compute_managers"
         $computeManagerStatusService = Get-NsxtService -Name "com.vmware.nsx.fabric.compute_managers.status"
 
-        $computeManagerSpec = $computeManagerSerivce.help.create.compute_manager.Create()
-        $credentialSpec = $computeManagerSerivce.help.create.compute_manager.credential.username_password_login_credential.Create()
+        $computeManagerSpec = $computeManagerService.help.create.compute_manager.Create()
+        $credentialSpec = $computeManagerService.help.create.compute_manager.credential.username_password_login_credential.Create()
         $VCUsername = "administrator@$VCSASSODomainName"
         $VCURL = "https://" + $VCSAHostname + ":443"
         $VCThumbprint = Get-SSLThumbprint256 -URL $VCURL
@@ -1007,7 +1091,9 @@ if($postDeployNSXConfig -eq 1) {
         $computeManagerSpec.origin_type = "vCenter"
         $computeManagerSpec.display_name = $VCSAHostname
         $computeManagerSpec.credential = $credentialSpec
-        $computeManagerResult = $computeManagerSerivce.create($computeManagerSpec)
+        $computeManagerSpec.create_service_account = $true
+        $computeManagerSpec.set_as_oidc_provider = $true
+        $computeManagerResult = $computeManagerService.create($computeManagerSpec)
 
         if($debug) { My-Logger "Waiting for VC registration to complete ..." }
             while ( $computeManagerStatusService.get($computeManagerResult.id).registration_status -ne "REGISTERED") {
@@ -1086,11 +1172,11 @@ if($postDeployNSXConfig -eq 1) {
         $VDSUuid = $VDS.Uuid
         Disconnect-VIServer $vc -Confirm:$false
 
-        $hostswitchProfileSerivce = Get-NsxtService -Name "com.vmware.nsx.host_switch_profiles"
+        $hostswitchProfileService = Get-NsxtService -Name "com.vmware.nsx.host_switch_profiles"
 
         $ipPool = (Get-NsxtService -Name "com.vmware.nsx.pools.ip_pools").list().results | where { $_.display_name -eq $TunnelEndpointName }
         $OverlayTZ = (Get-NsxtService -Name "com.vmware.nsx.transport_zones").list().results | where { $_.display_name -eq $OverlayTransportZoneName }
-        $ESXiUplinkProfile = $hostswitchProfileSerivce.list().results | where { $_.display_name -eq $ESXiUplinkProfileName }
+        $ESXiUplinkProfile = $hostswitchProfileService.list().results | where { $_.display_name -eq $ESXiUplinkProfileName }
 
         $esxiIpAssignmentSpec = [pscustomobject] @{
             "resource_type" = "StaticIpPoolSpec";
@@ -1189,7 +1275,7 @@ if($postDeployNSXConfig -eq 1) {
 
     if($runAddEdgeTransportNode) {
         $transportNodeService = Get-NsxtService -Name "com.vmware.nsx.transport_nodes"
-        $hostswitchProfileSerivce = Get-NsxtService -Name "com.vmware.nsx.host_switch_profiles"
+        $hostswitchProfileService = Get-NsxtService -Name "com.vmware.nsx.host_switch_profiles"
         $transportNodeStateService = Get-NsxtService -Name "com.vmware.nsx.transport_nodes.state"
 
         # Retrieve all Edge Host Nodes
@@ -1197,10 +1283,10 @@ if($postDeployNSXConfig -eq 1) {
         $ipPool = (Get-NsxtService -Name "com.vmware.nsx.pools.ip_pools").list().results | where { $_.display_name -eq $TunnelEndpointName }
         $OverlayTZ = (Get-NsxtService -Name "com.vmware.nsx.transport_zones").list().results | where { $_.display_name -eq $OverlayTransportZoneName }
         $VlanTZ = (Get-NsxtService -Name "com.vmware.nsx.transport_zones").list().results | where { $_.display_name -eq $VlanTransportZoneName }
-        $ESXiUplinkProfile = $hostswitchProfileSerivce.list().results | where { $_.display_name -eq $ESXiUplinkProfileName }
-        $EdgeUplinkProfile = $hostswitchProfileSerivce.list().results | where { $_.display_name -eq $EdgeUplinkProfileName }
-        $NIOCProfile = $hostswitchProfileSerivce.list($null,"VIRTUAL_MACHINE","NiocProfile",$true,$null,$null,$null).results | where {$_.display_name -eq "nsx-default-nioc-hostswitch-profile"}
-        $LLDPProfile = $hostswitchProfileSerivce.list($null,"VIRTUAL_MACHINE","LldpHostSwitchProfile",$true,$null,$null,$null).results | where {$_.display_name -eq "LLDP [Send Packet Enabled]"}
+        $ESXiUplinkProfile = $hostswitchProfileService.list().results | where { $_.display_name -eq $ESXiUplinkProfileName }
+        $EdgeUplinkProfile = $hostswitchProfileService.list().results | where { $_.display_name -eq $EdgeUplinkProfileName }
+        $NIOCProfile = $hostswitchProfileService.list($null,"VIRTUAL_MACHINE","NiocProfile",$true,$null,$null,$null).results | where {$_.display_name -eq "nsx-default-nioc-hostswitch-profile"}
+        $LLDPProfile = $hostswitchProfileService.list($null,"VIRTUAL_MACHINE","LldpHostSwitchProfile",$true,$null,$null,$null).results | where {$_.display_name -eq "LLDP [Send Packet Enabled]"}
 
         foreach ($edgeNode in $edgeNodes) {
             $overlayIpAssignmentSpec = [pscustomobject] @{
@@ -1432,8 +1518,8 @@ if($postDeployNSXConfig -eq 1) {
     Disconnect-NsxtServer -Confirm:$false
 }
 
-if($setupPacific -eq 1) {
-    My-Logger "Connecting to Management vCenter Server $VIServer for enabling Pacific ..."
+if($setupTanzu -eq 1) {
+    My-Logger "Connecting to Management vCenter Server $VIServer for enabling Tanzu ..."
     Connect-VIServer $VIServer -User $VIUsername -Password $VIPassword -WarningAction SilentlyContinue | Out-Null
 
     My-Logger "Creating Principal Identity in vCenter Server ..."

@@ -28,6 +28,11 @@ You are now ready to get your K8s on! 😁
 
 ## Changelog
 
+* **03/08/2021**
+  * Changes to better support vSphere 7.0 Update 1 & NSX-T 3.1.x
+  * Added TKG Content Library
+  * Minor misc. revisions
+
 * **02/21/2021**
   * Verified support for vSphere 7.0 Update 1 & NSX-T 3.1
   * Fix T0 Interface creation due to API changes with NSX-T
