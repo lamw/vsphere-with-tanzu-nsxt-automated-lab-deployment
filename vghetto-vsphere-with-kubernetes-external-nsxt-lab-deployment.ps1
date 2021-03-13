@@ -165,7 +165,7 @@ $setupTKGContentLibrary = 1
 $deployNSXManager = 1
 $deployNSXEdge = 1
 $postDeployNSXConfig = 1
-$setupTanzu = 0
+$setupTanzu = 1
 $moveVMsIntovApp = 1
 
 $vcsaSize2MemoryStorageMap = @{
@@ -1521,10 +1521,6 @@ if($postDeployNSXConfig -eq 1) {
 if($setupTanzu -eq 1) {
     My-Logger "Connecting to Management vCenter Server $VIServer for enabling Tanzu ..."
     Connect-VIServer $VIServer -User $VIUsername -Password $VIPassword -WarningAction SilentlyContinue | Out-Null
-
-    My-Logger "Creating Principal Identity in vCenter Server ..."
-    $princpitalIdentityCmd = "echo `'$VCSASSOPassword`' | appliancesh dcli +username `'administrator@$VCSASSODomainName`' +password `'$VCSASSOPassword`' +show-unreleased com vmware vcenter nsxd principalidentity create --username `'$NSXAdminUsername`' --password `'$NSXAdminPassword`'"
-    Invoke-VMScript -ScriptText $princpitalIdentityCmd  -vm (Get-VM $VCSADisplayName) -GuestUser "root" -GuestPassword "$VCSARootPassword" | Out-File -Append -LiteralPath $verboseLogFile
 
     My-Logger "Creating local $DevOpsUsername User in vCenter Server ..."
     $devopsUserCreationCmd = "/usr/lib/vmware-vmafd/bin/dir-cli user create --account $DevOpsUsername --first-name `"Dev`" --last-name `"Ops`" --user-password `'$DevOpsPassword`' --login `'administrator@$VCSASSODomainName`' --password `'$VCSASSOPassword`'"
