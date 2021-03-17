@@ -18,7 +18,7 @@
 
 ## Description
 
-Similar to other "vGhetto Lab Deployment Scripts" (such as [here](https://www.virtuallyghetto.com/2016/11/vghetto-automated-vsphere-lab-deployment-for-vsphere-6-0u2-vsphere-6-5.html), [here](https://www.virtuallyghetto.com/2017/10/vghetto-automated-nsx-t-2-0-lab-deployment.html) and [here](https://www.virtuallyghetto.com/2018/06/vghetto-automated-pivotal-container-service-pks-lab-deployment.html)), this script makes it very easy for anyone with VMware Cloud Foundation 4 licensing to deploy vSphere with Kubernetes in a Nested Lab environment for learning and educational purposes. All required VMware components (ESXi, vCenter Server, NSX Unified Appliance and Edge) are automatically deployed and configured to allow enablement of vSphere with Kubernetes. For more details about vSphere with Kubernetes, please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-21ABC792-0A23-40EF-8D37-0367B483585E.html).
+Similar to other "vGhetto Lab Deployment Scripts" (such as [here](https://www.virtuallyghetto.com/2016/11/vghetto-automated-vsphere-lab-deployment-for-vsphere-6-0u2-vsphere-6-5.html), [here](https://www.virtuallyghetto.com/2017/10/vghetto-automated-nsx-t-2-0-lab-deployment.html) and [here](https://www.virtuallyghetto.com/2018/06/vghetto-automated-pivotal-container-service-pks-lab-deployment.html)), this script makes it very easy for anyone with VMware Cloud Foundation 4 (for vSphere 7.0 deployments) or VMware Tanzu (for vSphere 7.0U1 deployments) licensing to deploy vSphere with Kubernetes/Tanzu in a Nested Lab environment for learning and educational purposes. All required VMware components (ESXi, vCenter Server, NSX Unified Appliance and Edge) are automatically deployed and configured to allow enablement of vSphere with Kubernetes. For more details about vSphere with Kubernetes, please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-21ABC792-0A23-40EF-8D37-0367B483585E.html).
 
 Below is a diagram of what is deployed as part of the solution and you simply need to have an existing vSphere environment running that is managed by vCenter Server and with enough resources (CPU, Memory and Storage) to deploy this "Nested" lab. For a complete end-to-end example including workload management enablement (post-deployment operation) and the deployment of a Tanzu Kubernetes Grid (TKG) Cluster, please have a look at the [Sample Execution](#sample-execution) section below.
 
@@ -64,7 +64,7 @@ You are now ready to get your K8s on! 😁
         **Note:** For detailed requirements, plesae refer to the official document [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-B1388E77-2EEC-41E2-8681-5AE549D50C77.html)
 
 * [VMware Cloud Foundation Licenses](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-9A190942-BDB1-4A19-BA09-728820A716F2.html)
-* Desktop (Windows, Mac or Linux) with latest PowerShell Core and PowerCLI 12.0 Core installed. See [ instructions here](https://blogs.vmware.com/PowerCLI/2018/03/installing-powercli-10-0-0-macos.html) for more details
+* Desktop (Windows, Mac or Linux) with latest PowerShell Core and PowerCLI 12.0 Core installed. See [instructions here](https://blogs.vmware.com/PowerCLI/2018/03/installing-powercli-10-0-0-macos.html) for more details
 * vSphere 7 & NSX-T OVAs:
     * [vCenter Server Appliance 7.0 Update 1 Build 17491101](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=VC70U1D&productId=974&rPId=60903)
     * [NSX-T Unified Appliance 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
@@ -87,11 +87,11 @@ You are now ready to get your K8s on! 😁
     * Yes, simply search for the following variables and change their values to `0` to not deploy NSX-T components or run through the configurations
 
         ```
-        $setupPacificStoragePolicy = 0
+        $setupTanzuStoragePolicy = 0
         $deployNSXManager = 0
         $deployNSXEdge = 0
         $postDeployNSXConfig = 0
-        $setupPacific = 0
+        $setupTanzu = 0
         ```
 
 4) Can I just deploy vSphere (VCSA, ESXi), vSAN and  NSX-T but not configure it for vSphere with Kubernetes?
@@ -99,7 +99,7 @@ You are now ready to get your K8s on! 😁
     * Yes, but some of the NSX-T automation will contain some configurations related to vSphere with Kubernetes. It does not affect the usage of NSX-T, so you can simply ignore or just delete those settings. Search for the following variables and change their values to `0` to not apply the vSphere with Kubernetes configurations
 
         ```
-        $setupPacific = 0
+        $setupTanzu = 0
         ```
 
 5) Can the script deploy two NSX-T Edges?
@@ -122,7 +122,7 @@ You are now ready to get your K8s on! 😁
 
 Before you can run the script, you will need to edit the script and update a number of variables to match your deployment environment. Details on each section is described below including actual values used in my home lab environment.
 
-This section describes the credentials to your physical vCenter Server in which the Project Pacific lab environment will be deployed to:
+This section describes the credentials to your physical vCenter Server in which the Tanzu lab environment will be deployed to:
 ```console
 $VIServer = "mgmt-vcsa-01.cpbu.corp"
 $VIUsername = "administrator@vsphere.local"
@@ -133,10 +133,10 @@ $VIPassword = "VMware1!"
 This section describes the location of the files required for deployment.
 
 ```console
-$NestedESXiApplianceOVA = "C:\Users\william\Desktop\Project-Pacific\Nested_ESXi7.0_Appliance_Template_v1.ova"
-$VCSAInstallerPath = "C:\Users\william\Desktop\Project-Pacific\VMware-VCSA-all-7.0.0-15952498"
-$NSXTManagerOVA = "C:\Users\william\Desktop\Project-Pacific\nsx-unified-appliance-3.0.0.0.0.15946738.ova"
-$NSXTEdgeOVA = "C:\Users\william\Desktop\Project-Pacific\nsx-edge-3.0.0.0.0.15946738.ova"
+$NestedESXiApplianceOVA = "C:\Users\william\Desktop\Tanzu\Nested_ESXi7.0_Appliance_Template_v1.ova"
+$VCSAInstallerPath = "C:\Users\william\Desktop\Tanzu\VMware-VCSA-all-7.0.0-15952498"
+$NSXTManagerOVA = "C:\Users\william\Desktop\Tanzu\nsx-unified-appliance-3.0.0.0.0.15946738.ova"
+$NSXTEdgeOVA = "C:\Users\william\Desktop\Tanzu\nsx-edge-3.0.0.0.0.15946738.ova"
 ```
 **Note:** The path to the VCSA Installer must be the extracted contents of the ISO
 
@@ -144,9 +144,9 @@ $NSXTEdgeOVA = "C:\Users\william\Desktop\Project-Pacific\nsx-edge-3.0.0.0.0.1594
 This section defines the number of Nested ESXi VMs to deploy along with their associated IP Address(s). The names are merely the display name of the VMs when deployed. At a minimum, you should deploy at least three hosts, but you can always add additional hosts and the script will automatically take care of provisioning them correctly.
 ```console
 $NestedESXiHostnameToIPs = @{
-    "pacific-esxi-7" = "172.17.31.113"
-    "pacific-esxi-8" = "172.17.31.114"
-    "pacific-esxi-9" = "172.17.31.115"
+    "tanzu-esxi-7" = "172.17.31.113"
+    "tanzu-esxi-8" = "172.17.31.114"
+    "tanzu-esxi-9" = "172.17.31.115"
 }
 ```
 
@@ -161,9 +161,9 @@ $NestedESXiCapacityvDisk = "100" #GB
 This section describes the VCSA deployment configuration such as the VCSA deployment size, Networking & SSO configurations. If you have ever used the VCSA CLI Installer, these options should look familiar.
 ```console
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "pacific-vcsa-3"
+$VCSADisplayName = "tanzu-vcsa-3"
 $VCSAIPAddress = "172.17.31.112"
-$VCSAHostname = "pacific-vcsa-3.cpbu.corp" #Change to IP if you don't have valid DNS
+$VCSAHostname = "tanzu-vcsa-3.cpbu.corp" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "24"
 $VCSASSODomainName = "vsphere.local"
 $VCSASSOPassword = "VMware1!"
@@ -184,7 +184,7 @@ $VMNTP = "pool.ntp.org"
 $VMPassword = "VMware1!"
 $VMDomain = "cpbu.corp"
 $VMSyslog = "172.17.31.112"
-$VMFolder = "Project-Pacific"
+$VMFolder = "Tanzu"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
 $VMVMFS = "false"
@@ -192,18 +192,18 @@ $VMVMFS = "false"
 
 This section describes the configuration of the new vCenter Server from the deployed VCSA. **Default values are sufficient.**
 ```console
-$NewVCDatacenterName = "Pacific-Datacenter"
+$NewVCDatacenterName = "Tanzu-Datacenter"
 $NewVCVSANClusterName = "Workload-Cluster"
-$NewVCVDSName = "Pacific-VDS"
+$NewVCVDSName = "Tanzu-VDS"
 $NewVCDVPGName = "DVPG-Management Network"
 ```
 
-This section describes the Project Pacific Configurations. **Default values are sufficient.**
+This section describes the Tanzu Configurations. **Default values are sufficient.**
 ```console
-# Pacific Configuration
-$StoragePolicyName = "pacific-gold-storage-policy"
-$StoragePolicyTagCategory = "pacific-demo-tag-category"
-$StoragePolicyTagName = "pacific-demo-storage"
+# Tanzu Configuration
+$StoragePolicyName = "tanzu-gold-storage-policy"
+$StoragePolicyTagCategory = "tanzu-demo-tag-category"
+$StoragePolicyTagName = "tanzu-demo-storage"
 $DevOpsUsername = "devops"
 $DevOpsPassword = "VMware1!"
 ```
@@ -220,10 +220,10 @@ $NSXAuditUsername = "audit"
 $NSXAuditPassword = "VMware1!VMware1!"
 $NSXSSHEnable = "true"
 $NSXEnableRootLogin = "true"
-$NSXVTEPNetwork = "Pacific-VTEP" # This portgroup needs be created before running script
+$NSXVTEPNetwork = "Tanzu-VTEP" # This portgroup needs be created before running script
 
 # Transport Node Profile
-$TransportNodeProfileName = "Pacific-Host-Transport-Node-Profile"
+$TransportNodeProfileName = "Tanzu-Host-Transport-Node-Profile"
 
 # Transport Zones
 $TunnelEndpointName = "TEP-IP-Pool"
@@ -239,14 +239,14 @@ $VlanTransportZoneName = "TZ-VLAN"
 $VlanTransportZoneNameHostSwitchName = "edgeswitch"
 
 # Network Segment
-$NetworkSegmentName = "Pacific-Segment"
+$NetworkSegmentName = "Tanzu-Segment"
 $NetworkSegmentVlan = "0"
 
 # T0 Gateway
-$T0GatewayName = "Pacific-T0-Gateway"
+$T0GatewayName = "Tanzu-T0-Gateway"
 $T0GatewayInterfaceAddress = "172.17.31.119" # should be a routable address
 $T0GatewayInterfacePrefix = "24"
-$T0GatewayInterfaceStaticRouteName = "Pacific-Static-Route"
+$T0GatewayInterfaceStaticRouteName = "Tanzu-Static-Route"
 $T0GatewayInterfaceStaticRouteNetwork = "0.0.0.0/0"
 $T0GatewayInterfaceStaticRouteAddress = "172.17.31.253"
 
@@ -271,8 +271,8 @@ $EdgeClusterName = "Edge-Cluster-01"
 $NSXTMgrDeploymentSize = "small"
 $NSXTMgrvCPU = "6" #override default size
 $NSXTMgrvMEM = "24" #override default size
-$NSXTMgrDisplayName = "pacific-nsx-3"
-$NSXTMgrHostname = "pacific-nsx-3.cpbu.corp"
+$NSXTMgrDisplayName = "tanzu-nsx-3"
+$NSXTMgrHostname = "tanzu-nsx-3.cpbu.corp"
 $NSXTMgrIPAddress = "172.17.31.118"
 
 # NSX-T Edge Configuration
@@ -280,7 +280,7 @@ $NSXTEdgeDeploymentSize = "medium"
 $NSXTEdgevCPU = "8" #override default size
 $NSXTEdgevMEM = "32" #override default size
 $NSXTEdgeHostnameToIPs = @{
-    "pacific-nsx-edge-3a" = "172.17.31.116"
+    "tanzu-nsx-edge-3a" = "172.17.31.116"
 }
 ```
 
@@ -288,7 +288,7 @@ Once you have saved your changes, you can now run the PowerCLI script as you nor
 
 ## Logging
 
-There is additional verbose logging that outputs as a log file in your current working directory **pacific-nsxt-external-vghetto-lab-deployment.log**
+There is additional verbose logging that outputs as a log file in your current working directory **tanzu-nsxt-external-vghetto-lab-deployment.log**
 
 ## Sample Execution
 
@@ -296,12 +296,12 @@ In this example below, I will be using a single /24 native VLAN (172.17.31.0/24)
 
 | Hostname                   | IP Address                     | Function                     |
 |----------------------------|--------------------------------|------------------------------|
-| pacific-vcsa-3.cpbu.corp   | 172.17.31.112                  | vCenter Server               |
-| pacific-esxi-7.cpbu.corp   | 172.17.31.113                  | ESXi                         |
-| pacific-esxi-8.cpbu.corp   | 172.17.31.114                  | ESXi                         |
-| pacific-esxi-9.cpbu.corp   | 172.17.31.115                  | ESXi                         |
-| pacific-nsx-edge.cpbu.corp | 172.17.31.116                  | NSX-T Edge                   |
-| pacific-nsx-ua.cpbu.corp   | 172.17.31.118                  | NSX-T Unified Appliance      |
+| tanzu-vcsa-3.cpbu.corp     | 172.17.31.112                  | vCenter Server               |
+| tanzu-esxi-7.cpbu.corp     | 172.17.31.113                  | ESXi                         |
+| tanzu-esxi-8.cpbu.corp     | 172.17.31.114                  | ESXi                         |
+| tanzu-esxi-9.cpbu.corp     | 172.17.31.115                  | ESXi                         |
+| tanzu-nsx-edge.cpbu.corp   | 172.17.31.116                  | NSX-T Edge                   |
+| tanzu-nsx-ua.cpbu.corp     | 172.17.31.118                  | NSX-T Unified Appliance      |
 | n/a                        | 172.17.31.119                  | T0 Static Route Address      |
 | n/a                        | 172.17.31.120 to 172.17.31.125 | K8s Master Control Plane VMs |
 | n/a                        | 172.17.31.140/27               | Ingress CIDR Range           |
@@ -345,11 +345,11 @@ Step 4 - Configure the Management Network by selecting the `DVPG-Management-Netw
 
 ![](screenshots/screenshot-8.png)
 
-Step 5 - Configure the Workload Network by selecting the `Pacific-VDS` distributed virtual switch which is automatically created for you as part of the automation. After selecting a valid VDS, the Edge Cluster option should automatically populate with our NSX-T Edge Cluster called `Edge-Cluster-01`. Next, fill in your DNS server along with both the Ingress and Egress CIDR values (/27 network is required minimally or you can go larger)
+Step 5 - Configure the Workload Network by selecting the `Tanzu-VDS` distributed virtual switch which is automatically created for you as part of the automation. After selecting a valid VDS, the Edge Cluster option should automatically populate with our NSX-T Edge Cluster called `Edge-Cluster-01`. Next, fill in your DNS server along with both the Ingress and Egress CIDR values (/27 network is required minimally or you can go larger)
 
 ![](screenshots/screenshot-9.png)
 
-Step 6 - Configure the Storage policies by selecting the `pacific-gold-storage-policy` VM Storage Policy which is automatically created for you as part of the automation or any other VM Storage Policy you wish to use.
+Step 6 - Configure the Storage policies by selecting the `tanzu-gold-storage-policy` VM Storage Policy which is automatically created for you as part of the automation or any other VM Storage Policy you wish to use.
 
 Step 7 - Finally, review workload management configuration and click `Finish` to begin the deployment.
 
@@ -369,7 +369,7 @@ Step 1 - Under the `Namespaces` tab within the workload management UI, select th
 
 ![](screenshots/screenshot-13.png)
 
-Step 2 - Click on `Add Permissions` to assign both the user `administrator@vsphere.local` and `devops@vsphere.local` which was automatically created by the Automation or any other valid user within vSphere to be able to deploy workloads and click on `Edit Storage` to assign the VM Storage Policy `pacific-gold-storage-policy` or any other valid VM Storage Policy.
+Step 2 - Click on `Add Permissions` to assign both the user `administrator@vsphere.local` and `devops@vsphere.local` which was automatically created by the Automation or any other valid user within vSphere to be able to deploy workloads and click on `Edit Storage` to assign the VM Storage Policy `tanzu-gold-storage-policy` or any other valid VM Storage Policy.
 
 ![](screenshots/screenshot-14.png)
 
@@ -473,11 +473,11 @@ spec:
     controlPlane:
       class: best-effort-xsmall
       count: 1
-      storageClass: pacific-gold-storage-policy
+      storageClass: tanzu-gold-storage-policy
     workers:
       class: best-effort-xsmall
       count: 3
-      storageClass: pacific-gold-storage-policy
+      storageClass: tanzu-gold-storage-policy
   settings:
     network:
       cni:
@@ -487,7 +487,7 @@ spec:
       pods:
         cidrBlocks: ["192.0.2.0/16"]
     storage:
-      defaultClass: pacific-gold-storage-policy
+      defaultClass: tanzu-gold-storage-policy
 ```
 
 Step 4 - Create TKG Cluster by running the following:
