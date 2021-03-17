@@ -12,6 +12,10 @@ $VCSAInstallerPath = "C:\Users\william\Desktop\Tanzu\VMware-VCSA-all-7.0.1-16860
 $NSXTManagerOVA = "C:\Users\william\Desktop\Tanzu\nsx-unified-appliance-3.1.1.0.0.17483186.ova"
 $NSXTEdgeOVA = "C:\Users\william\Desktop\Tanzu\nsx-edge-3.1.1.0.0.17483065.ova"
 
+# TKG Content Library URL
+$TKGContentLibraryName = "TKG-Content-Library"
+$TKGContentLibraryURL = "https://wp-content.vmware.com/v2/latest/lib.json"
+
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
     "tanzu-esxi-7" = "172.17.31.113"
