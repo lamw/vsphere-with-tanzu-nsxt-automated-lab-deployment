@@ -1,4 +1,4 @@
-# vGhetto Automated vSphere with Kubernetes Lab Deployment
+# vSphere with Tanzu using NSX-T Automated Lab Deployment
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@
 
 ## Description
 
-Similar to other "vGhetto Lab Deployment Scripts" (such as [here](https://www.virtuallyghetto.com/2016/11/vghetto-automated-vsphere-lab-deployment-for-vsphere-6-0u2-vsphere-6-5.html), [here](https://www.virtuallyghetto.com/2017/10/vghetto-automated-nsx-t-2-0-lab-deployment.html) and [here](https://www.virtuallyghetto.com/2018/06/vghetto-automated-pivotal-container-service-pks-lab-deployment.html)), this script makes it very easy for anyone with VMware Cloud Foundation 4 (for vSphere 7.0 deployments) or VMware Tanzu (for vSphere 7.0U1 deployments) licensing to deploy vSphere with Kubernetes/Tanzu in a Nested Lab environment for learning and educational purposes. All required VMware components (ESXi, vCenter Server, NSX Unified Appliance and Edge) are automatically deployed and configured to allow enablement of vSphere with Kubernetes. For more details about vSphere with Kubernetes, please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-21ABC792-0A23-40EF-8D37-0367B483585E.html).
+Similar to other "VMware Automated Lab Deployment Scripts" (such as [here](https://www.virtuallyghetto.com/2016/11/vghetto-automated-vsphere-lab-deployment-for-vsphere-6-0u2-vsphere-6-5.html), [here](https://www.virtuallyghetto.com/2017/10/vghetto-automated-nsx-t-2-0-lab-deployment.html) and [here](https://www.virtuallyghetto.com/2018/06/vghetto-automated-pivotal-container-service-pks-lab-deployment.html)), this script makes it very easy for anyone with VMware Cloud Foundation 4 (for vSphere 7.0 deployments) or VMware Tanzu (for vSphere 7.0U1 deployments) licensing to deploy vSphere with Kubernetes/Tanzu in a Nested Lab environment for learning and educational purposes. All required VMware components (ESXi, vCenter Server, NSX Unified Appliance and Edge) are automatically deployed and configured to allow enablement of vSphere with Kubernetes. For more details about vSphere with Kubernetes, please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-21ABC792-0A23-40EF-8D37-0367B483585E.html).
 
 Below is a diagram of what is deployed as part of the solution and you simply need to have an existing vSphere environment running that is managed by vCenter Server and with enough resources (CPU, Memory and Storage) to deploy this "Nested" lab. For a complete end-to-end example including workload management enablement (post-deployment operation) and the deployment of a Tanzu Kubernetes Grid (TKG) Cluster, please have a look at the [Sample Execution](#sample-execution) section below.
 
@@ -288,7 +288,7 @@ Once you have saved your changes, you can now run the PowerCLI script as you nor
 
 ## Logging
 
-There is additional verbose logging that outputs as a log file in your current working directory **tanzu-nsxt-external-vghetto-lab-deployment.log**
+There is additional verbose logging that outputs as a log file in your current working directory **vsphere-with-tanzu-nsxt-lab-deployment.log**
 
 ## Sample Execution
 
