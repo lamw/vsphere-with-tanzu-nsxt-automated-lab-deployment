@@ -1,5 +1,5 @@
 # Author: William Lam
-# Website: www.virtuallyghetto.com
+# Website: www.williamlam.com
 
 # vCenter Server used to deploy vSphere with Kubernetes Lab
 $VIServer = "mgmt-vcsa-01.cpbu.corp"

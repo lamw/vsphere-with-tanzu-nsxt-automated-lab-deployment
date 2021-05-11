@@ -18,7 +18,7 @@
 
 ## Description
 
-Similar to other "VMware Automated Lab Deployment Scripts" (such as [here](https://www.virtuallyghetto.com/2016/11/vghetto-automated-vsphere-lab-deployment-for-vsphere-6-0u2-vsphere-6-5.html), [here](https://www.virtuallyghetto.com/2017/10/vghetto-automated-nsx-t-2-0-lab-deployment.html) and [here](https://www.virtuallyghetto.com/2018/06/vghetto-automated-pivotal-container-service-pks-lab-deployment.html)), this script makes it very easy for anyone with VMware Cloud Foundation 4 (for vSphere 7.0 deployments) or VMware Tanzu (for vSphere 7.0U1 deployments) licensing to deploy vSphere with Kubernetes/Tanzu in a Nested Lab environment for learning and educational purposes. All required VMware components (ESXi, vCenter Server, NSX Unified Appliance and Edge) are automatically deployed and configured to allow enablement of vSphere with Kubernetes. For more details about vSphere with Kubernetes, please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-21ABC792-0A23-40EF-8D37-0367B483585E.html).
+Similar to other "VMware Automated Lab Deployment Scripts" (such as [here](https://www.williamlam.com/2016/11/vghetto-automated-vsphere-lab-deployment-for-vsphere-6-0u2-vsphere-6-5.html), [here](https://www.williamlam.com/2017/10/vghetto-automated-nsx-t-2-0-lab-deployment.html) and [here](https://www.williamlam.com/2018/06/vghetto-automated-pivotal-container-service-pks-lab-deployment.html)), this script makes it very easy for anyone with VMware Cloud Foundation 4 (for vSphere 7.0 deployments) or VMware Tanzu (for vSphere 7.0U1 deployments) licensing to deploy vSphere with Kubernetes/Tanzu in a Nested Lab environment for learning and educational purposes. All required VMware components (ESXi, vCenter Server, NSX Unified Appliance and Edge) are automatically deployed and configured to allow enablement of vSphere with Kubernetes. For more details about vSphere with Kubernetes, please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-21ABC792-0A23-40EF-8D37-0367B483585E.html).
 
 Below is a diagram of what is deployed as part of the solution and you simply need to have an existing vSphere environment running that is managed by vCenter Server and with enough resources (CPU, Memory and Storage) to deploy this "Nested" lab. For a complete end-to-end example including workload management enablement (post-deployment operation) and the deployment of a Tanzu Kubernetes Grid (TKG) Cluster, please have a look at the [Sample Execution](#sample-execution) section below.
 
@@ -38,14 +38,14 @@ You are now ready to get your K8s on! 😁
   * Fix T0 Interface creation due to API changes with NSX-T
 
 * **04/27/2020**
-  * Enable minimum vSphere with K8s Deployment. Please see this [blog post](https://www.virtuallyghetto.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
+  * Enable minimum vSphere with K8s Deployment. Please see this [blog post](https://www.williamlam.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
 
 * **04/13/2020**
   * Initial Release
 
 ## Requirements
 * vCenter Server running at least vSphere 6.7 or later
-    * If your physical storage is vSAN, please ensure you've applied the following setting as mentioned [here](https://www.virtuallyghetto.com/2013/11/how-to-run-nested-esxi-on-top-of-vsan.html)
+    * If your physical storage is vSAN, please ensure you've applied the following setting as mentioned [here](https://www.williamlam.com/2013/11/how-to-run-nested-esxi-on-top-of-vsan.html)
 * Resource Requirements
     * Compute
         * Ability to provision VMs with up to 8 vCPU
@@ -74,13 +74,13 @@ You are now ready to get your K8s on! 😁
 ## FAQ
 
 1) What if I do not have a VMware Cloud Foundation 4 License?
-    * You can purchase a VMUG Advantage membership which gives you access to all the latest VMware solutions including VCF 4.0. There is also a special [VMUG Advantage Homelab Group Buy with an additional 15% discount](https://www.virtuallyghetto.com/2020/04/special-vmug-advantage-homelab-group-buy.html) that you can take advantage of right now!
+    * You can purchase a VMUG Advantage membership which gives you access to all the latest VMware solutions including VCF 4.0. There is also a special [VMUG Advantage Homelab Group Buy with an additional 15% discount](https://www.williamlam.com/2020/04/special-vmug-advantage-homelab-group-buy.html) that you can take advantage of right now!
 
 2) Can I reduce the default CPU, Memory and Storage resources?
 
     * You can, but it is highly recommended to leave the current defaults for the best working experience. For non-vSphere with Kubernetes usage, you can certainly tune down the resources. For vSphere Pod usage, it is possible to deploy the NSX-T Edge with just 4 vCPU, however if you are going to deploy TKG Clusters, you will need 8 vCPUs on the NSX-T Edge for proper functionality. For memory resources, you can reduce the ESXi VM memory to 16GB but if you intend to deploy K8s application/workloads, you will want to keep the default. For NSX-T memory, I have seen cases where system will become unresponsive and although you can probably tune it down a bit more, I would strongly suggest you keep the defaults unless you plan to do exhaustive testing to ensure there is no negative impact.
 
-    **UPDATE (04/27/20)**: Please see this [blog post](https://www.virtuallyghetto.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
+    **UPDATE (04/27/20)**: Please see this [blog post](https://www.williamlam.com/2020/04/deploying-a-minimal-vsphere-with-kubernetes-environment.html) for more details.
 
 3) Can I just deploy vSphere (VCSA, ESXi) and vSAN without NSX-T and vSphere with Kubernetes?
 
@@ -112,11 +112,11 @@ You are now ready to get your K8s on! 😁
 
 7) How do I troubleshoot enabling or consuming vSphere with Kubernetes?
 
-    * Please refer to this [troubleshooting tips for vSphere with Kubernetes](https://www.virtuallyghetto.com/2020/05/troubleshooting-tips-for-configuring-vsphere-with-kubernetes.html) blog post
+    * Please refer to this [troubleshooting tips for vSphere with Kubernetes](https://www.williamlam.com/2020/05/troubleshooting-tips-for-configuring-vsphere-with-kubernetes.html) blog post
 
 8) Is there a way to automate the enablement of Workload Management to a vSphere Cluster?
 
-    * Yes, please see [Workload Management PowerCLI Module for automating vSphere with Kubernetes](https://www.virtuallyghetto.com/2020/05/workload-management-powercli-module-for-automating-vsphere-with-kubernetes.html) blog post for more details.
+    * Yes, please see [Workload Management PowerCLI Module for automating vSphere with Kubernetes](https://www.williamlam.com/2020/05/workload-management-powercli-module-for-automating-vsphere-with-kubernetes.html) blog post for more details.
 
 ## Configuration
 
