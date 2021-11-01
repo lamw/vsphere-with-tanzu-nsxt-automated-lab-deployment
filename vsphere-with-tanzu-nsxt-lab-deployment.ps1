@@ -737,19 +737,19 @@ if($deployVCSA -eq 1) {
 
         if($IsWindows) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
-            $config | ConvertTo-Json | Set-Content -Path "$($ENV:Temp)\jsontemplate.json"
+            $config | ConvertTo-Json | Set-Content -Path "$($ENV:Temp)\jsontemplate.json" -Depth 3
 
             My-Logger "Deploying the VCSA ..."
             Invoke-Expression "$($VCSAInstallerPath)\vcsa-cli-installer\win32\vcsa-deploy.exe install --no-esx-ssl-verify --accept-eula --acknowledge-ceip $($ENV:Temp)\jsontemplate.json"| Out-File -Append -LiteralPath $verboseLogFile
         } elseif($IsMacOS) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
-            $config | ConvertTo-Json | Set-Content -Path "$($ENV:TMPDIR)jsontemplate.json"
+            $config | ConvertTo-Json | Set-Content -Path "$($ENV:TMPDIR)jsontemplate.json" -Depth 3
 
             My-Logger "Deploying the VCSA ..."
             Invoke-Expression "$($VCSAInstallerPath)/vcsa-cli-installer/mac/vcsa-deploy install --no-esx-ssl-verify --accept-eula --acknowledge-ceip $($ENV:TMPDIR)jsontemplate.json"| Out-File -Append -LiteralPath $verboseLogFile
         } elseif ($IsLinux) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
-            $config | ConvertTo-Json | Set-Content -Path "/tmp/jsontemplate.json"
+            $config | ConvertTo-Json | Set-Content -Path "/tmp/jsontemplate.json" -Depth 3
 
             My-Logger "Deploying the VCSA ..."
             Invoke-Expression "$($VCSAInstallerPath)/vcsa-cli-installer/lin64/vcsa-deploy install --no-esx-ssl-verify --accept-eula --acknowledge-ceip /tmp/jsontemplate.json"| Out-File -Append -LiteralPath $verboseLogFile
