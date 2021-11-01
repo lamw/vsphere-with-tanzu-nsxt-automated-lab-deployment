@@ -625,6 +625,10 @@ if($deployNestedESXiVMs -eq 1) {
             $ovfconfig.common.guestinfo.createvmfs.value = $true
         }
 
+
+        My-Logger "Setting Ignore Invalid vCenter SSL Certificates ..."
+        Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false 
+
         My-Logger "Deploying Nested ESXi VM $VMName ..."
         $vm = Import-VApp -Source $NestedESXiApplianceOVA -OvfConfiguration $ovfconfig -Name $VMName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
 
