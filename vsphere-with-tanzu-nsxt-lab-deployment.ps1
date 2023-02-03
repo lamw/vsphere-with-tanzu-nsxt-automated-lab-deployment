@@ -1205,7 +1205,7 @@ if($postDeployNSXConfig -eq 1) {
         }
 
         $json = [pscustomobject] @{
-            "resource_type" = "TransportNode";
+            "resource_type" = "TransportNodeProfile";
             "display_name" = $TransportNodeProfileName;
             "host_switch_spec" = [pscustomobject] @{
                 "host_switches" = @($esxiHostswitchSpec)
