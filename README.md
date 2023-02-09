@@ -28,6 +28,12 @@ You are now ready to get your K8s on! 😁
 
 ## Changelog
 
+* **02/09/2023**
+  * Allow additional NSX-T Edge nodes 
+
+* **02/03/2023**
+  * Fix issue #29
+
 * **03/08/2021**
   * Changes to better support vSphere 7.0 Update 1 & NSX-T 3.1.x
   * Added TKG Content Library
@@ -104,7 +110,7 @@ You are now ready to get your K8s on! 😁
 
 5) Can the script deploy two NSX-T Edges?
 
-    * Yes, simply append to the configuration to include the additional Edge which will be brought into the Edge Cluster during configuration. The script currently does not include the additional code that is required to make use of the 2nd edge. This maybe an enhancement in the future or you can manually configure the required settings.
+    * Yes, simply append to the configuration to include the additional Edge which will be brought into the Edge Cluster during configuration. The limit 10 Edge Nodes [Per Cluster](https://configmax.esp.vmware.com/guest?vmwareproduct=VMware%20NSX&release=NSX-T%20Data%20Center%203.2.1&categories=17-0)
 
 6) How do I enable vSphere with Kubernetes after the script has completed?
 
