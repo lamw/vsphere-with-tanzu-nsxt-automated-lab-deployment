@@ -50,6 +50,7 @@ You are now ready to get your K8s on! 😁
     * Compute
         * Ability to provision VMs with up to 8 vCPU
         * Ability to provision up to 116-140 GB of memory
+        * DRS-enabled Cluster (not required but vApp creation will not be possible)
     * Network
         * Single Standard or Distributed Portgroup (Native VLAN) used to deploy all VMs
             * 6 x IP Addresses for VCSA, ESXi, NSX-T UA and Edge VM
