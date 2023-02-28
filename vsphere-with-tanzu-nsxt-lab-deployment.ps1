@@ -1210,7 +1210,7 @@ if($postDeployNSXConfig -eq 1) {
         }
 
         $json = [pscustomobject] @{
-            "resource_type" = "TransportNode";
+            "resource_type" = "TransportNodeProfile";
             "display_name" = $TransportNodeProfileName;
             "host_switch_spec" = [pscustomobject] @{
                 "host_switches" = @($esxiHostswitchSpec)
@@ -1452,7 +1452,7 @@ if($postDeployNSXConfig -eq 1) {
         $edgeClusterService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters"
 
         $edgeCluster = ($edgeClusterService.list().results | where {$_.display_name -eq $EdgeClusterName})
-        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.member_index
+        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.member_index[0]
         if($debug) { "EdgeClusterMember: ${edgeClusterMember}" | Out-File -Append -LiteralPath $verboseLogFile }
 
         $policyEdgeCluster = ($edgeClusterPolicyService.list("default","default").results | where {$_.display_name -eq $EdgeClusterName})
