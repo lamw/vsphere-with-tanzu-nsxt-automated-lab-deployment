@@ -27,6 +27,20 @@ You are now ready to get your K8s on! 😁
 ![](screenshots/diagram.png)
 
 ## Changelog
+* **11/07/2023**
+ * Updated for vSphere 8.0 and NSX 4.1.1 due to API changes since vSphere 7 and NSX 3
+ * Added a few checks to allow reuse of existing objects like vCenter VDS, VDPortGroup, StoragePolicy, Tag and TagCategory, NSX TransportNodeProfile.
+ * Added FAQ to create multiple Clusters, and using the same VDS/VDPortGroup, This allow Multi Kubernetes Cluster High-Availability with vSphere Zone and Workload Enablement.
+ * Added a few pause in the usecase where we deploy only a new cluster to allow Nested ESXi to boot and fully come online (180s) and before VSAN Diskgroup creation (30s).
+ * Added FTT configuration for VSAN allowing 0 redundancy and to use only one node demo lab VSAN Cluster.
+  * $hostFailuresToTolerate = 0
+ * Added pause to the script to workaround [blog post](https://williamlam.com/2020/05/configure-nsx-t-edge-to-run-on-amd-ryzen-cpu.html) without babysitting for AMD Zen DPDK FastPath capable owner CPU.
+  * $NSXTEdgeAmdZenPause = 0
+ * Added -DownloadContentOnDemand option in TKG Content Library to prevent the download in advance of 250GB for each cluster and reduce to a few GB.
+ * Added T0 VRF Gateway Automated Creation with Static route like the Parent T0 (Note: an uplink segment '$NetworkSegmentProjectVRF' is connected to parent T0)
+ * Added Project and VPC Automated Creation with there respective IP Blocks/Subnets.
+ * FAQ Updated for the recent changes
+ * Download links updated
 
 * **02/09/2023**
   * Allow additional NSX-T Edge nodes 
@@ -71,12 +85,12 @@ You are now ready to get your K8s on! 😁
         **Note:** For detailed requirements, plesae refer to the official document [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-B1388E77-2EEC-41E2-8681-5AE549D50C77.html)
 
 * [VMware Cloud Foundation Licenses](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-9A190942-BDB1-4A19-BA09-728820A716F2.html)
-* Desktop (Windows, Mac or Linux) with latest PowerShell Core and PowerCLI 12.0 Core installed. See [instructions here](https://blogs.vmware.com/PowerCLI/2018/03/installing-powercli-10-0-0-macos.html) for more details
-* vSphere 7 & NSX-T OVAs:
-    * [vCenter Server Appliance 7.0 Update 1 Build 17491101](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=VC70U1D&productId=974&rPId=60903)
-    * [NSX-T Unified Appliance 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
-    * [NSX-T Edge 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
-    * [Nested ESXi 7.0 Update 1 OVA - Build 15344619](https://download3.vmware.com/software/vmw-tools/nested-esxi/Nested_ESXi7.0u1_Appliance_Template_v1.ova)
+* Desktop (Windows, Mac or Linux) with latest PowerShell Core and PowerCLI 13.0 Core installed. See [instructions here](https://blogs.vmware.com/PowerCLI/2018/03/installing-powercli-10-0-0-macos.html) for more details
+* vSphere 8 & NSX-T 4 OVAs:
+    * [VMware vCenter Server 8.0U1a Build 21815093](http://www.vmware.com/go/evaluate-vsphere-en)
+    * [NSX-T Unified Appliance 4.1.2 OVA - Build 22589037](http://www.vmware.com/go/try-nsx-t-en)
+    * [NSX-T Edge 4.1.2 OVA - Build 22589037](http://www.vmware.com/go/try-nsx-t-en)
+    * [Nested ESXi 8.0 Update 1a OVA - Build 21813344](https://download3.vmware.com/software/vmw-tools/nested-esxi/Nested_ESXi8.0u1a_Appliance_Template_v1.ova)
 
 ## FAQ
 
@@ -108,20 +122,96 @@ You are now ready to get your K8s on! 😁
         ```
         $setupTanzu = 0
         ```
+5) Can i just deploy additional vSphere Cluster?
+    * Yes, simply changes following variables: new $NestedESXiHostnameToIPs, customize like $NewVCVSANClusterName = "Workload-Cluster-1" and $vsanDatastoreName = "vsanDatastore-1"
 
-5) Can the script deploy two NSX-T Edges?
+        ```
+        $VAppName = "Nested-vSphere-with-Tanzu-NSX-T-Lab-qnateilb" # "Nested-vSphere-with-Tanzu-NSX-T-Lab-$random_string" reuse the $VAppName for 2nd and 3rd cluster deployments
+        ```
+		```
+        $deployVCSA = 0
+        $deployNSXManager = 0
+        $deployNSXEdge = 0
+		```
+        ```
+            $runHealth=$true
+            $runCEIP=$false
+            $runAddVC=$false
+            $runIPPool=$false
+            $runTransportZone=$false
+            $runUplinkProfile=$false
+            $runTransportNodeProfile=$true
+            $runAddEsxiTransportNode=$true
+            $runAddEdgeTransportNode=$false
+            $runAddEdgeCluster=$false
+            $runNetworkSegment=$false
+            $runT0Gateway=$false
+            $runT0StaticRoute=$false
+            $registervCenterOIDC=$false
+        ```
+6) Can the script setup T0 VRF Gateway?
+    * Yes, simply
+        ```
+        # T0 VRF Gateway
+        $VRF = "0" #any integer from 0-4094 
+        $NetworkSegmentProjectVRF = "$ProjectName-$VRF"
+        $NetworkSegmentVlanProjectVRF = "$VRF" #any integer from 0-4094 or the variable $VRF if it's an integer
+        $NetworkSegmentProjectVRFSubnetGw = "192.168.2.177/28"
 
-    * Yes, simply append to the configuration to include the additional Edge which will be brought into the Edge Cluster during configuration. The limit 10 Edge Nodes [Per Cluster](https://configmax.esp.vmware.com/guest?vmwareproduct=VMware%20NSX&release=NSX-T%20Data%20Center%203.2.1&categories=17-0)
+        $T0GatewayVRFName = "T0-$ProjectName-$VRF-Gateway"
+        $T0GatewayVRFInterfaceAddress = "192.168.2.190" # should be a routable address on the vrf's vlan
+        $T0GatewayVRFInterfacePrefix = "28"
+        $T0GatewayVRFInterfaceStaticRouteName = "T0-$ProjectName-$VRF-Static-Route"
+        $T0GatewayVRFInterfaceStaticRouteNetwork = "0.0.0.0/0"
+        $T0GatewayVRFInterfaceStaticRouteAddress = "192.168.2.177"
 
-6) How do I enable vSphere with Kubernetes after the script has completed?
+        # Which T0 to use for the Project External connectivity : $T0GatewayName or $T0GatewayVRFName
+        $ProjectT0 = $T0GatewayVRFName
+        ```
+7) Can the script setup NSX 4.x Projects?
+     * Yes, simply
+        ```
+        # Project ,Public Ip Block, Private Ip Block
+        $ProjectName = "Project-160"
+        $ShortId = "PRJ160"
+        $ProjectPUBipblockName = "VRF-160-192-168-1-160-27"
+        $ProjectPUBcidr = "192.168.1.160/27" # Maximum 5 Public Ip Block per Project
+        $VpcProjectPRIVipblockName = "VRF-160-10-10-160-0-23"
+        $VpcProjectPRIVcidr = "10.10.160.0/23"
+        ```
+8) Can the script setup NSX 4.1.1 VPC?
+    * Yes, simply
+      ```
+      # VPC, Public Subnet, Private Subnet
+      $VpcName = "VPC-160"
+      $VpcPublicSubnet = "192-168-1-176-28"
+      $VpcPublicSubnetIpaddresses = "192.168.1.176/28" # Must be subset of Project Public cidr, and can't use the first or last subnet block size !
+      $VpcPublicSubnetSize = 16 # Minimum 16
+      $VpcPrivateSubnet = "10-10-160-0-24"
+      $VpcPrivateSubnetIpaddresses = "10.10.160.0/24" # Must be subset of Project Private cidr
+      $VpcPrivateSubnetSize = 256 # Minimum 16
+      ```
+9) Can the script be pause to workaround (see Changelog) for AMD Zen before NSX Edge is used?
+    * Yes, simply set the following variable to 1, apply the workaround, wait a few minutes for the NSX Edge to reboot, then hit anyKey for the script to continue.
+      ```
+      $NSXTEdgeAmdZenPause = 1
+      ```
+10) Can i deploy Multiple Zone Kubernetes Cluster High Availability
+    * Yes, simply deploy 3 cluster with a single VDSwitch, then see this [blog post](stirevevietually.net) and refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-installation-configuration/GUID-544286A2-A403-4CA5-9C73-8EFF261545E7.html)
+      
+11) Can the script deploy two NSX-T Edges?
+
+    * Yes, simply append to the configuration to include the additional Edge Hostname IP which will be brought into the Edge Cluster during configuration. The limit 10 Edge Nodes [Per Cluster](https://configmax.esp.vmware.com/guest?vmwareproduct=VMware%20NSX&release=NSX-T%20Data%20Center%203.2.1&categories=17-0)
+
+12) How do I enable vSphere with Kubernetes after the script has completed?
 
     * Please refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-287138F0-1FFD-4774-BBB9-A1FAB932D1C4.html) with the instructions
 
-7) How do I troubleshoot enabling or consuming vSphere with Kubernetes?
+13) How do I troubleshoot enabling or consuming vSphere with Kubernetes?
 
     * Please refer to this [troubleshooting tips for vSphere with Kubernetes](https://www.williamlam.com/2020/05/troubleshooting-tips-for-configuring-vsphere-with-kubernetes.html) blog post
 
-8) Is there a way to automate the enablement of Workload Management to a vSphere Cluster?
+14) Is there a way to automate the enablement of Workload Management to a vSphere Cluster?
 
     * Yes, please see [Workload Management PowerCLI Module for automating vSphere with Kubernetes](https://www.williamlam.com/2020/05/workload-management-powercli-module-for-automating-vsphere-with-kubernetes.html) blog post for more details.
 
