@@ -30,7 +30,7 @@ You are now ready to get your K8s on! 😁
 * **11/07/2023**
  * Updated for vSphere 8.0 and NSX 4.1.1 due to API changes since vSphere 7 and NSX 3
  * Added a few checks to allow reuse of existing objects like vCenter VDS, VDPortGroup, StoragePolicy, Tag and TagCategory, NSX TransportNodeProfile.
- * Added FAQ to create multiple Clusters, and using the same VDS/VDPortGroup, This allow Multi Kubernetes Cluster High-Availability with vSphere Zone and Workload Enablement.
+ * Added FAQ to create multiple Clusters, and using the same VDS/VDPortGroup, This allow Multi Kubernetes Cluster High-Availability with vSphere Zone and Workload Enablement. Please see this [blog post](http://www.strivevirtually.net)
  * Added a few pause in the usecase where we deploy only a new cluster to allow Nested ESXi to boot and fully come online (180s) and before VSAN Diskgroup creation (30s).
  * Added FTT configuration for VSAN allowing 0 redundancy and to use only one node demo lab VSAN Cluster.
   * $hostFailuresToTolerate = 0
@@ -197,7 +197,7 @@ You are now ready to get your K8s on! 😁
       $NSXTEdgeAmdZenPause = 1
       ```
 10) Can i deploy Multiple Zone Kubernetes Cluster High Availability
-    * Yes, simply deploy 3 cluster with a single VDSwitch, then see this [blog post](stirevevietually.net) and refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-installation-configuration/GUID-544286A2-A403-4CA5-9C73-8EFF261545E7.html)
+    * Yes, simply deploy 3 cluster with a single VDSwitch, then see this [blog post](http://www.strivevirtually.net) and refer to the official VMware documentation [here](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-installation-configuration/GUID-544286A2-A403-4CA5-9C73-8EFF261545E7.html)
       
 11) Can the script deploy two NSX-T Edges?
 
