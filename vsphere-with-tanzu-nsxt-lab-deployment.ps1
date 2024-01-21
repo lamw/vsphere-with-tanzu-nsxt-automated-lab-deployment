@@ -84,7 +84,7 @@ $NSXAuditUsername = "audit"
 $NSXAuditPassword = "VMware1!VMware1!"
 $NSXSSHEnable = "true"
 $NSXEnableRootLogin = "true"
-$NSXVTEPNetwork = "TANZU-VTEP" # This portgroup needs be created before running script on a separate vswitch with MTU 1700
+$NSXVTEPNetwork = "Tanzu-VTEP" # This portgroup needs be created before running script on a separate vswitch with MTU 1700
 
 # Transport Node Profile
 $TransportNodeProfileName = "Tanzu-Host-Transport-Node-Profile"
