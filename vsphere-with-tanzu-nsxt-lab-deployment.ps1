@@ -205,26 +205,26 @@ $VAppName = "Nested-vSphere-with-Tanzu-NSX-T-Lab-$random_string"
 
 $preCheck = 1
 $confirmDeployment = 1
-$deployNestedESXiVMs = 0
-$deployVCSA = 0
-$setupNewVC = 0
-$addESXiHostsToVC = 0
-$configureVSANDiskGroup = 0
-$configureVDS = 0
-$clearVSANHealthCheckAlarm = 0
-$setupTanzuStoragePolicy = 0
-$setupTKGContentLibrary = 0
-$deployNSXManager = 0
-$deployNSXEdge = 0
-$postDeployNSXConfig = 0
-$setupTanzu = 0
-$moveVMsIntovAp = 0
+$deployNestedESXiVMs = 1
+$deployVCSA = 1
+$setupNewVC = 1
+$addESXiHostsToVC = 1
+$configureVSANDiskGroup = 1
+$configureVDS = 1
+$clearVSANHealthCheckAlarm = 1
+$setupTanzuStoragePolicy = 1
+$setupTKGContentLibrary = 1
+$deployNSXManager = 1
+$deployNSXEdge = 1
+$postDeployNSXConfig = 1
+$setupTanzu = 1
+$moveVMsIntovAp = 1
 
-$deployProjectExternalIPBlocksConfig = 1
-$deployProject = 1
-$deployVpc = 1
-$deployVpcSubnetPublic = 1
-$deployVpcSubnetPrivate = 1
+$deployProjectExternalIPBlocksConfig = 0
+$deployProject = 0
+$deployVpc = 0
+$deployVpcSubnetPublic = 0
+$deployVpcSubnetPrivate = 0
 $vcsaSize2MemoryStorageMap = @{
 "tiny"=@{"cpu"="2";"mem"="12";"disk"="415"};
 "small"=@{"cpu"="4";"mem"="19";"disk"="480"};
