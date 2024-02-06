@@ -10,7 +10,7 @@ $VIPassword = "VMware1!"
 
 # Full Path to both the Nested ESXi 8.0 VA, Extracted VCSA 8.0 ISO & NSX-T 4.1.1 OVAs
 $NestedESXiApplianceOVA = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\Nested_ESXi8.0u1a_Appliance_Template_v1.ova"
-$VCSAInstallerPath = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\VMware-VCSA-all-8.0.1-22088981"
+$VCSAInstallerPath = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\VMware-VCSA-all-8.0.1-22368047"
 $NSXTManagerOVA = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\nsx-unified-appliance-4.1.2.0.0.22589293-le.ova"
 $NSXTEdgeOVA = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\nsx-edge-4.1.2.0.0.22589297-le.ova"
 
@@ -26,8 +26,8 @@ $NestedESXiHostnameToIPs = @{
 	}
 
 # Nested ESXi VM Resources
-$NestedESXivCPU = "8"
-$NestedESXivMEM = "24" #GB
+$NestedESXivCPU = "4"
+$NestedESXivMEM = "28" #GB
 $NestedESXiCachingvDisk = "8" #GB
 $NestedESXiCapacityvDisk = "400" #GB
 $NestedESXiBootDisk = "32" #GB
@@ -51,7 +51,7 @@ $VMDatastore = "datastore1"
 $VMNetmask = "255.255.255.0"
 $VMGateway = "192.168.1.253"
 $VMDNS = "192.168.1.100"
-$VMNTP = "192.168.1.253"
+$VMNTP = "pool.ntp.org"
 $VMPassword = "VMware1!"
 $VMDomain = "abidi.systems"
 $VMSyslog = "192.168.1.112"
@@ -84,7 +84,7 @@ $NSXAuditUsername = "audit"
 $NSXAuditPassword = "VMware1!VMware1!"
 $NSXSSHEnable = "true"
 $NSXEnableRootLogin = "true"
-$NSXVTEPNetwork = "Tanzu-VTEP" # This portgroup needs be created before running script
+$NSXVTEPNetwork = "Tanzu-VTEP" # This portgroup needs be created before running script on a separate vswitch with MTU 1700
 
 # Transport Node Profile
 $TransportNodeProfileName = "Tanzu-Host-Transport-Node-Profile"
@@ -93,9 +93,9 @@ $TransportNodeProfileName = "Tanzu-Host-Transport-Node-Profile"
 $TunnelEndpointName = "TEP-IP-Pool"
 $TunnelEndpointDescription = "Tunnel Endpoint for Transport Nodes"
 $TunnelEndpointIPRangeStart = "172.30.1.10"
-$TunnelEndpointIPRangeEnd = "172.30.1.20"
+$TunnelEndpointIPRangeEnd = "172.30.1.30"
 $TunnelEndpointCIDR = "172.30.1.0/24"
-$TunnelEndpointGateway = "172.30.1.1"
+$TunnelEndpointGateway = "172.30.1.1" # This IP need to created before running script on a virtual router VM with MTU 1700 and the virtualnic to "Tanzu-VTEP" portgroup
 
 # Transport Zones
 $OverlayTransportZoneName = "TZ-Overlay"
@@ -109,15 +109,15 @@ $NetworkSegmentVlan = "0"
 # Project ,Public Ip Block, Private Ip Block
 $ProjectName = "Project-160"
 $ShortId = "PRJ160"
-$ProjectPUBipblockName = "VRF-160-192-168-1-160-27"
-$ProjectPUBcidr = "192.168.1.160/27" # Maximum 5 Public Ip Block per Project
+$ProjectPUBipblockName = "VRF-160-192-168-3-160-27"
+$ProjectPUBcidr = "192.168.3.160/27" # Maximum 5 Public Ip Block per Project
 $VpcProjectPRIVipblockName = "VRF-160-10-10-160-0-23"
 $VpcProjectPRIVcidr = "10.10.160.0/23"
 
 # VPC, Public Subnet, Private Subnet
 $VpcName = "VPC-160"
-$VpcPublicSubnet = "192-168-1-176-28"
-$VpcPublicSubnetIpaddresses = "192.168.1.176/28" # Must be subset of Project Public cidr, and can't use the first or last subnet block size 
+$VpcPublicSubnet = "192-168-3-176-28"
+$VpcPublicSubnetIpaddresses = "192.168.3.176/28" # Must be subset of Project Public cidr, and can't use the first or last subnet block size 
 $VpcPublicSubnetSize = 16 # Minimum 16
 $VpcPrivateSubnet = "10-10-160-0-24"
 $VpcPrivateSubnetIpaddresses = "10.10.160.0/24" # Must be subset of Project Private cidr
@@ -126,44 +126,43 @@ $VpcPrivateSubnetSize = 256 # Minimum 16
 
 # T0 Gateway
 $T0GatewayName = "Tanzu-T0-Gateway"
-$T0GatewayInterfaceAddress = "192.168.1.119" # should be a routable address
+$T0GatewayInterfaceAddresses = "192.168.1.121","192.168.1.122"#,"192.168.1.123","192.168.1.124" # should be a routable address
 $T0GatewayInterfacePrefix = "24"
 $T0GatewayInterfaceStaticRouteName = "Tanzu-Static-Route"
 $T0GatewayInterfaceStaticRouteNetwork = "0.0.0.0/0"
 $T0GatewayInterfaceStaticRouteAddress = "192.168.1.253"
 
 # T0 VRF Gateway
-$VRF = "0" #any integer from 0-4094 
-$NetworkSegmentProjectVRF = "$ProjectName-$VRF"
+$VRF = "160" #any integer from 0-4094 
+$NetworkSegmentProjectVRF = "T0-VRF-$VRF-$ProjectName-Segment"
 $NetworkSegmentVlanProjectVRF = "$VRF" #any integer from 0-4094 or the variable $VRF if it's an integer
-$NetworkSegmentProjectVRFSubnetGw = "192.168.2.177/28"
+$NetworkSegmentProjectVRFSubnetGw = "192.168.3.161/27"
 
-$T0GatewayVRFName = "T0-$ProjectName-$VRF-Gateway"
-$T0GatewayVRFInterfaceAddress = "192.168.2.190" # should be a routable address on the vrf's vlan
+$T0GatewayVRFName = "T0-VRF-$VRF-$ProjectName-Gateway"
+$T0GatewayVRFInterfaceAddresses = "192.168.3.161","192.168.3.162" # should be a routable address on the vrf's vlan
 $T0GatewayVRFInterfacePrefix = "28"
-$T0GatewayVRFInterfaceStaticRouteName = "T0-$ProjectName-$VRF-Static-Route" # note T0 scope is add to to T0VRF scope
+$T0GatewayVRFInterfaceStaticRouteName = "T0-VRF-$VRF-$ProjectName-Static-Route"
 $T0GatewayVRFInterfaceStaticRouteNetwork = "0.0.0.0/0"
-$T0GatewayVRFInterfaceStaticRouteAddress = "192.168.2.177"
+#$T0GatewayVRFInterfaceStaticRouteAddress = "192.168.1.253"
 
 # Which T0 to use for the Project External connectivity : $T0GatewayName or $T0GatewayVRFName
 $ProjectT0 = $T0GatewayVRFName
 
 # Uplink Profiles
 $ESXiUplinkProfileName = "ESXi-Host-Uplink-Profile"
-$ESXiUplinkProfilePolicy = "FAILOVER_ORDER"
-$ESXiUplinkName = "uplink1"
+$ESXiUplinkProfilePolicy = "LOADBALANCE_SRCID"
+$ESXiUplinkNames = @("uplink1","uplink2")
 $ESXiUplinkProfileTransportVLAN = "0"
 
 $EdgeUplinkProfileName = "Edge-Uplink-Profile"
-$EdgeUplinkProfilePolicy = "FAILOVER_ORDER"
-$EdgeOverlayUplinkName = "uplink1"
-$EdgeOverlayUplinkProfileActivepNIC = "fp-eth1"
-$EdgeUplinkName = "tep-uplink"
-$EdgeUplinkProfileActivepNIC = "fp-eth2"
+$EdgeUplinkProfilePolicy = "LOADBALANCE_SRCID"
+$EdgeOverlayUplinkNames = @("uplink1","uplink2")
+$EdgeOverlayUplinkProfileActivepNICs = "fp-eth0","fp-eth3"
+$EdgeUplinkNames = @("tep-uplink-1","tep-uplink-2")
+$EdgeUplinkProfileActivepNICs = "fp-eth1","fp-eth2"
 $EdgeUplinkProfileTransportVLAN = "0"
 
-$EdgeUplinkProfileNameVRF = "Edge-Uplink-Profile-$VRF"
-$EdgeUplinkProfileTransportVLANVRF = "$VRF"
+
 $EdgeUplinkProfileMTU = "1700"
 
 
@@ -187,7 +186,9 @@ $NSXTEdgevCPU = "4" #override default size
 $NSXTEdgevMEM = "8" #override default size
 $NSXTEdgeHostnameToIPs = @{
     "tanzu-nsx-edge1-4a" = "192.168.1.116"
-	#"tanzu-nsx-edge2-4a" = "192.168.1.117"
+	"tanzu-nsx-edge2-4a" = "192.168.1.117"
+    #"tanzu-nsx-edge3-4a" = "192.168.1.119"
+    #"tanzu-nsx-edge4-4a" = "192.168.1.120"
 }
 $NSXTEdgeAmdZenPause = 0 # Pause the script to workaround for AMD Zen DPDK FastPath Capable following https://williamlam.com/2020/05/configure-nsx-t-edge-to-run-on-amd-ryzen-cpu.html
 
@@ -217,14 +218,13 @@ $deployNSXManager = 1
 $deployNSXEdge = 1
 $postDeployNSXConfig = 1
 $setupTanzu = 1
-$moveVMsIntovApp = 1
+$moveVMsIntovAp = 1
 
 $deployProjectExternalIPBlocksConfig = 0
 $deployProject = 0
 $deployVpc = 0
 $deployVpcSubnetPublic = 0
 $deployVpcSubnetPrivate = 0
-
 $vcsaSize2MemoryStorageMap = @{
 "tiny"=@{"cpu"="2";"mem"="12";"disk"="415"};
 "small"=@{"cpu"="4";"mem"="19";"disk"="480"};
@@ -521,7 +521,7 @@ if($confirmDeployment -eq 1) {
 		Write-Host -NoNewline -ForegroundColor Green "Hostname(s): "
 		Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.Keys
 		Write-Host -NoNewline -ForegroundColor Green "IP Address(s): "
-		Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.Values
+		Write-Host -ForegroundColor White ($NestedESXiHostnameToIPs.Values | Sort-Object)
 		Write-Host -NoNewline -ForegroundColor Green "Netmask "
 		Write-Host -ForegroundColor White $VMNetmask
 		Write-Host -NoNewline -ForegroundColor Green "Gateway: "
@@ -579,7 +579,7 @@ if($confirmDeployment -eq 1) {
             Write-Host -NoNewline -ForegroundColor Green "# of NSX Edge VMs: "
             Write-Host -NoNewline -ForegroundColor White $NSXTEdgeHostnameToIPs.count
             Write-Host -NoNewline -ForegroundColor Green " IP Address(s): "
-            Write-Host -ForegroundColor White $NSXTEdgeHostnameToIPs.Values
+            Write-Host -ForegroundColor White ($NSXTEdgeHostnameToIPs.Values | Sort-Object)
         }
 
         Write-Host -NoNewline -ForegroundColor Green "Netmask: "
@@ -612,10 +612,8 @@ if($confirmDeployment -eq 1) {
             Write-Host -ForegroundColor White $T0GatewayVRFName
 			Write-Host -NoNewline -ForegroundColor Green "T0 VRF Gateway Interface: "
 			Write-Host -ForegroundColor White $T0GatewayVRFInterfaceAddress
-			Write-Host -NoNewline -ForegroundColor Green "T0 VRF Gateway Static Route Address: "
-			Write-Host -ForegroundColor White $T0GatewayVRFInterfaceStaticRouteAddress
-			Write-Host -NoNewline -ForegroundColor Green "NSX Project Public IP Addresses: "
-			Write-Host -ForegroundColor White $NetworkSegmentProjectVRFSubnetGw
+			#Write-Host -NoNewline -ForegroundColor Green "T0 VRF Gateway Static Route Address: "
+			#Write-Host -ForegroundColor White $T0GatewayVRFInterfaceStaticRouteAddress
 			Write-Host -NoNewline -ForegroundColor Green "NSX Project Network Segment: "
 			Write-Host -ForegroundColor White $NetworkSegmentProjectVRF
 		}
@@ -753,15 +751,21 @@ if($deployNestedESXiVMs -eq 1) {
         My-Logger "Deploying Nested ESXi VM $VMName ..."
         $vm = Import-VApp -Source $NestedESXiApplianceOVA -OvfConfiguration $ovfconfig -Name $VMName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
 
-        My-Logger "Adding vmnic2/vmnic3 to $NSXVTEPNetwork ..."
-        New-NetworkAdapter -VM $vm -Type Vmxnet3 -NetworkName $NSXVTEPNetwork -StartConnected -confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
-        New-NetworkAdapter -VM $vm -Type Vmxnet3 -NetworkName $NSXVTEPNetwork -StartConnected -confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
-
-        $vm | New-AdvancedSetting -name "ethernet2.filter4.name" -value "dvfilter-maclearn" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
+        My-Logger "Adding vmnic2 to $VMNetwork ..."
+		New-NetworkAdapter -VM $vm -Type Vmxnet3 -NetworkName $VMNetwork -StartConnected -confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
+		
+		$vm | New-AdvancedSetting -name "ethernet2.filter4.name" -value "dvfilter-maclearn" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
         $vm | New-AdvancedSetting -Name "ethernet2.filter4.onFailure" -value "failOpen" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
+		
+		My-Logger "Adding vmnic3/vmnic4 to $NSXVTEPNetwork ..."
+        New-NetworkAdapter -VM $vm -Type Vmxnet3 -NetworkName $NSXVTEPNetwork -StartConnected -confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
+        New-NetworkAdapter -VM $vm -Type Vmxnet3 -NetworkName $NSXVTEPNetwork -StartConnected -confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
 
         $vm | New-AdvancedSetting -name "ethernet3.filter4.name" -value "dvfilter-maclearn" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
         $vm | New-AdvancedSetting -Name "ethernet3.filter4.onFailure" -value "failOpen" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
+
+        $vm | New-AdvancedSetting -name "ethernet4.filter4.name" -value "dvfilter-maclearn" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
+        $vm | New-AdvancedSetting -Name "ethernet4.filter4.onFailure" -value "failOpen" -confirm:$false -ErrorAction SilentlyContinue | Out-File -Append -LiteralPath $verboseLogFile
 
         My-Logger "Updating vCPU Count to $NestedESXivCPU & vMEM to $NestedESXivMEM GB ..."
         Set-VM -Server $viConnection -VM $vm -NumCpu $NestedESXivCPU -MemoryGB $NestedESXivMEM -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
@@ -780,6 +784,7 @@ if($deployNestedESXiVMs -eq 1) {
 
         My-Logger "Powering On $vmname ..."
         $vm | Start-Vm -RunAsync | Out-Null
+		Start-Sleep -Seconds 180
     }
 }
 
@@ -923,6 +928,7 @@ if($deployNSXEdge -eq 1) {
         $nsxEdgeOvfConfig.NetworkMapping.Network_1.value = $NSXVTEPNetwork
         $nsxEdgeOvfConfig.NetworkMapping.Network_2.value = $VMNetwork
         $nsxEdgeOvfConfig.NetworkMapping.Network_3.value = $VMNetwork
+		$nsxEdgeOvfConfig.NetworkMapping.Network_4.value = $NSXVTEPNetwork
 
         $nsxEdgeOvfConfig.Common.nsx_hostname.Value = $VMHostname
         $nsxEdgeOvfConfig.Common.nsx_ip_0.Value = $VMIPAddress
@@ -972,6 +978,7 @@ if($moveVMsIntovApp -eq 1) {
     if((Get-Cluster -Server $viConnection $cluster).DrsEnabled) {
         if(-Not (Get-VApp -Name $VAppName -ErrorAction Ignore)) {
 			My-Logger "Creating vApp $VAppName ..."
+			$rp = Get-ResourcePool -Name Resources -Location $cluster
 			$VApp = New-VApp -Name $VAppName -Server $viConnection -Location $cluster
 			} else {
 				$VApp = $VAppName
@@ -984,19 +991,19 @@ if($moveVMsIntovApp -eq 1) {
         if($deployNestedESXiVMs -eq 1) {
             My-Logger "Moving Nested ESXi VMs into $VAppName vApp ..."
             $NestedESXiHostnameToIPs.GetEnumerator() | Sort-Object -Property Value | Foreach-Object {
-                $vm = Get-VM -Name $_.Key -Server $viConnection
+                $vm = Get-VM -Name $_.Key -Server $viConnection -Location $cluster | where{$_.ResourcePool.Id -eq $rp.Id}
                 Move-VM -VM $vm -Server $viConnection -Destination $VApp -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
             }
         }
 
         if($deployVCSA -eq 1) {
-            $vcsaVM = Get-VM -Name $VCSADisplayName -Server $viConnection
+            $vcsaVM = Get-VM -Name $VCSADisplayName -Server $viConnection -Location $cluster | where{$_.ResourcePool.Id -eq $rp.Id}
             My-Logger "Moving $VCSADisplayName into $VAppName vApp ..."
             Move-VM -VM $vcsaVM -Server $viConnection -Destination $VApp -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
         }
 
         if($deployNSXManager -eq 1) {
-            $nsxMgrVM = Get-VM -Name $NSXTMgrDisplayName -Server $viConnection
+            $nsxMgrVM = Get-VM -Name $NSXTMgrDisplayName -Server $viConnection -Location $cluster | where{$_.ResourcePool.Id -eq $rp.Id}
             My-Logger "Moving $NSXTMgrDisplayName into $VAppName vApp ..."
             Move-VM -VM $nsxMgrVM -Server $viConnection -Destination $VApp -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
         }
@@ -1004,7 +1011,7 @@ if($moveVMsIntovApp -eq 1) {
         if($deployNSXEdge -eq 1) {
             My-Logger "Moving NSX Edge VMs into $VAppName vApp ..."
             $NSXTEdgeHostnameToIPs.GetEnumerator() | Sort-Object -Property Value | Foreach-Object {
-                $nsxEdgeVM = Get-VM -Name $_.Key -Server $viConnection
+                $nsxEdgeVM = Get-VM -Name $_.Key -Server $viConnection -Location $cluster | where{$_.ResourcePool.Id -eq $rp.Id}
                 Move-VM -VM $nsxEdgeVM -Server $viConnection -Destination $VApp -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
             }
         }
@@ -1053,7 +1060,6 @@ if($setupNewVC -eq 1) {
                 $targetVMHost = $VMName
             }
             My-Logger "Adding ESXi host $targetVMHost to Cluster ..."
-			Start-Sleep -Seconds 180
             Add-VMHost -Server $vc -Location (Get-Cluster -Name $NewVCVSANClusterName) -User "root" -Password $VMPassword -Name $targetVMHost -Force | Out-File -Append -LiteralPath $verboseLogFile
         }
 		
@@ -1085,7 +1091,7 @@ if($setupNewVC -eq 1) {
                     $vsanCapacityDisk = $lun.CanonicalName
                 }
             }
-			Start-Sleep 30
+			Start-Sleep 60
             My-Logger "Creating VSAN DiskGroup for $vmhost ..."
             New-VsanDiskGroup -Server $vc -VMHost $vmhost -SsdCanonicalName $vsanCacheDisk -DataDiskCanonicalName $vsanCapacityDisk | Out-File -Append -LiteralPath $verboseLogFile
         }
@@ -1114,9 +1120,12 @@ if($setupNewVC -eq 1) {
 			My-Logger "Adding $vmhost to $NewVCVDSName"
 			$vds | Add-VDSwitchVMHost -VMHost $vmhost | Out-Null
 				
-			$vmhostNetworkAdapter = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic1
-			$vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter -Confirm:$false
+			$vmhostNetworkAdapter3 = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic3
+			$vmhostNetworkAdapter4 = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic4
+			$vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter3 -Confirm:$false #add vmnic3 to Tanzu-VDS as uplink1 that will become vmk10 nsx-overlay as vxlan Stack
+			$vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter4 -Confirm:$false #add vmnic4 to Tanzu-VDS as uplink2 that will become vmk11 nsx-overlay as vxlan Stack
         }
+		Start-Sleep 60
     }
 
     if($clearVSANHealthCheckAlarm -eq 1) {
@@ -1320,24 +1329,28 @@ if($postDeployNSXConfig -eq 1) {
 
         My-Logger "Creating ESXi Uplink Profile ..."
         $ESXiUplinkProfileSpec = $hostSwitchProfileService.help.create.base_host_switch_profile.uplink_host_switch_profile.Create()
-        $activeUplinkSpec = $hostSwitchProfileService.help.create.base_host_switch_profile.uplink_host_switch_profile.teaming.active_list.Element.Create()
-        $activeUplinkSpec.uplink_name = $ESXiUplinkName
-        $activeUplinkSpec.uplink_type = "PNIC"
-        $ESXiUplinkProfileSpec.display_name = $ESXiUplinkProfileName
-        $ESXiUplinkProfileSpec.transport_vlan = $ESXiUplinkProfileTransportVLAN
-        $addActiveUplink = $ESXiUplinkProfileSpec.teaming.active_list.Add($activeUplinkSpec)
+		foreach ($ESXiUplinkName in $ESXiUplinkNames) {
+			$activeUplinkSpec = $hostSwitchProfileService.help.create.base_host_switch_profile.uplink_host_switch_profile.teaming.active_list.Element.Create()
+			$activeUplinkSpec.uplink_name = $ESXiUplinkName
+			$activeUplinkSpec.uplink_type = "PNIC"
+			$ESXiUplinkProfileSpec.display_name = $ESXiUplinkProfileName
+			$ESXiUplinkProfileSpec.transport_vlan = $ESXiUplinkProfileTransportVLAN
+			$addActiveUplink = $ESXiUplinkProfileSpec.teaming.active_list.Add($activeUplinkSpec)
+		}
         $ESXiUplinkProfileSpec.teaming.policy = $ESXiUplinkProfilePolicy
         $ESXiUplinkProfile = $hostSwitchProfileService.create($ESXiUplinkProfileSpec)
 
         My-Logger "Creating Edge Uplink Profile ..."
         $EdgeUplinkProfileSpec = $hostSwitchProfileService.help.create.base_host_switch_profile.uplink_host_switch_profile.Create()
-        $activeUplinkSpec = $hostSwitchProfileService.help.create.base_host_switch_profile.uplink_host_switch_profile.teaming.active_list.Element.Create()
-        $activeUplinkSpec.uplink_name = $EdgeUplinkName
-        $activeUplinkSpec.uplink_type = "PNIC"
-        $EdgeUplinkProfileSpec.display_name = $EdgeUplinkProfileName
-        $EdgeUplinkProfileSpec.mtu = $EdgeUplinkProfileMTU
-        $EdgeUplinkProfileSpec.transport_vlan = $EdgeUplinkProfileTransportVLAN
-        $addActiveUplink = $EdgeUplinkProfileSpec.teaming.active_list.Add($activeUplinkSpec)
+		foreach ($EdgeUplinkName in $EdgeUplinkNames) {
+			$activeUplinkSpec = $hostSwitchProfileService.help.create.base_host_switch_profile.uplink_host_switch_profile.teaming.active_list.Element.Create()
+			$activeUplinkSpec.uplink_name = $EdgeUplinkName
+			$activeUplinkSpec.uplink_type = "PNIC"
+			$EdgeUplinkProfileSpec.display_name = $EdgeUplinkProfileName
+			$EdgeUplinkProfileSpec.mtu = $EdgeUplinkProfileMTU
+			$EdgeUplinkProfileSpec.transport_vlan = $EdgeUplinkProfileTransportVLAN
+			$addActiveUplink = $EdgeUplinkProfileSpec.teaming.active_list.Add($activeUplinkSpec)
+		}
         $EdgeUplinkProfileSpec.teaming.policy = $EdgeUplinkProfilePolicy
         $EdgeUplinkProfile = $hostSwitchProfileService.create($EdgeUplinkProfileSpec)
     }		
@@ -1374,7 +1387,10 @@ if($postDeployNSXConfig -eq 1) {
 				"host_switch_mode" = "STANDARD";
 				"host_switch_type" = "VDS";
 				"host_switch_id" = $VDSUuid;
-				"uplinks" = @(@{"uplink_name"=$ESXiUplinkName;"vds_uplink_name"=$ESXiUplinkName})
+				"uplinks" = @(
+								@{"uplink_name"=$ESXiUplinkNames.Get(0);"vds_uplink_name"=$ESXiUplinkNames.Get(0)},
+								@{"uplink_name"=$ESXiUplinkNames.Get(1);"vds_uplink_name"=$ESXiUplinkNames.Get(1)}
+								)
 				"ip_assignment_spec" = $esxiIpAssignmentSpec;
 				"host_switch_profile_ids" = @(@{"key"="UplinkHostSwitchProfile";"value"=$ESXiUplinkProfile.id})
 				"transport_zone_endpoints" = $hostTransportZoneEndpoints;
@@ -1491,7 +1507,10 @@ if($postDeployNSXConfig -eq 1) {
                 "host_switch_name" = $OverlayTransportZoneHostSwitchName;
                 "host_switch_mode" = "STANDARD";
                 "ip_assignment_spec" = $overlayIpAssignmentSpec
-                "pnics" = @(@{"device_name"=$EdgeOverlayUplinkProfileActivepNIC;"uplink_name"=$EdgeOverlayUplinkName;})
+                "pnics" = @(
+							@{"device_name"=$EdgeOverlayUplinkProfileActivepNICs.Get(0);"uplink_name"=$EdgeOverlayUplinkNames.Get(0);},
+							@{"device_name"=$EdgeOverlayUplinkProfileActivepNICs.Get(1);"uplink_name"=$EdgeOverlayUplinkNames.Get(1);}
+							)
                 "host_switch_profile_ids" = @(@{"key"="UplinkHostSwitchProfile";"value"=$ESXiUplinkProfile.id})
                 "transport_zone_endpoints" = $OverlayTransportZoneEndpoints;
             }
@@ -1499,7 +1518,10 @@ if($postDeployNSXConfig -eq 1) {
             $edgeHostswitchSpec = [pscustomobject]  @{
                 "host_switch_name" = $VlanTransportZoneNameHostSwitchName;
                 "host_switch_mode" = "STANDARD";
-                "pnics" = @(@{"device_name"=$EdgeUplinkProfileActivepNIC;"uplink_name"=$EdgeUplinkName;})
+                "pnics" = @(
+							@{"device_name"=$EdgeUplinkProfileActivepNICs.Get(0);"uplink_name"=$EdgeUplinkNames.Get(0);},
+							@{"device_name"=$EdgeUplinkProfileActivepNICs.Get(1);"uplink_name"=$EdgeUplinkNames.Get(1);}
+							)
                 "ip_assignment_spec" = $edgeIpAssignmentSpec
                 "host_switch_profile_ids" = @(@{"key"="UplinkHostSwitchProfile";"value"=$EdgeUplinkProfile.id})
                 "transport_zone_endpoints" = $EdgeTransportZoneEndpoints;
@@ -1633,20 +1655,17 @@ if($postDeployNSXConfig -eq 1) {
         $edgeClusterService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters"
 
         $edgeCluster = ($edgeClusterService.list().results | where {$_.display_name -eq $EdgeClusterName})
-        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.member_index[0]
-        if($debug) { "EdgeClusterMember: ${edgeClusterMember}" | Out-File -Append -LiteralPath $verboseLogFile }
+        $edgeClusterMembers = ($edgeClusterService.get($edgeCluster.id)).members
+        if($debug) { "EdgeClusterMember: $edgeClusterMembers" | Out-File -Append -LiteralPath $verboseLogFile }
 
         $policyEdgeCluster = ($edgeClusterPolicyService.list("default","default").results | where {$_.display_name -eq $EdgeClusterName})
         $policyEdgeClusterPath = $policyEdgeCluster.path
         if($debug) { "EdgeClusterPath: $policyEdgeClusterPath" | Out-File -Append -LiteralPath $verboseLogFile }
 
-        $edgeClusterNodePath = $policyEdgeClusterPath + "/edge-nodes/" + $edgeClusterMember
-        if($debug) { "EdgeClusterNodePath: $edgeClusterNodePath" | Out-File -Append -LiteralPath $verboseLogFile }
-
         $t0GatewaySpec = $t0GatewayPolicyService.help.patch.tier0.Create()
         $t0GatewaySpec.display_name = $T0GatewayName
-        $t0GatewaySpec.ha_mode = "ACTIVE_STANDBY"
-        $t0GatewaySpec.failover_mode = "NON_PREEMPTIVE"
+        $t0GatewaySpec.ha_mode = "ACTIVE_ACTIVE"
+        #$t0GatewaySpec.failover_mode = "NON_PREEMPTIVE" # Not used in Active-Active HA mode
         $t0Gateway = $t0GatewayPolicyService.update($T0GatewayName,$t0GatewaySpec)
 
         $localeServiceSpec = $t0GatewayLocalePolicyService.help.patch.locale_services.create()
@@ -1656,17 +1675,21 @@ if($postDeployNSXConfig -eq 1) {
 
         My-Logger "Creating External T0 Gateway Interface ..."
 
-        $t0GatewayInterfaceSpec = $t0GatewayInterfacePolicyService.help.update.tier0_interface.Create()
-        $t0GatewayInterfaceId = ([guid]::NewGuid()).Guid
-        $subnetSpec = $t0GatewayInterfacePolicyService.help.update.tier0_interface.subnets.Element.Create()
-        $subnetSpec.ip_addresses = @($T0GatewayInterfaceAddress)
-        $subnetSpec.prefix_len = $T0GatewayInterfacePrefix
-        $t0GatewayInterfaceSpec.segment_path = "/infra/segments/$NetworkSegmentName"
-        $t0GatewayInterfaceAddResult = $t0GatewayInterfaceSpec.subnets.Add($subnetSpec)
-        $t0GatewayInterfaceSpec.type = "EXTERNAL"
-        $t0GatewayInterfaceSpec.edge_path = $edgeClusterNodePath
-        $t0GatewayInterfaceSpec.resource_type = "Tier0Interface"
-        $t0GatewayInterface = $t0GatewayInterfacePolicyService.update($T0GatewayName,"default",$t0GatewayInterfaceId,$t0GatewayInterfaceSpec)
+        foreach ($edgeClusterMember in @($edgeClusterMembers.member_index)) {
+			$t0GatewayInterfaceSpec = $t0GatewayInterfacePolicyService.help.update.tier0_interface.Create()
+			$t0GatewayInterfaceId = ([guid]::NewGuid()).Guid
+			$subnetSpec = $t0GatewayInterfacePolicyService.help.update.tier0_interface.subnets.Element.Create()
+			$subnetSpec.ip_addresses = @($T0GatewayInterfaceAddresses.Get($edgeClusterMember))
+			$subnetSpec.prefix_len = $T0GatewayInterfacePrefix
+			$t0GatewayInterfaceSpec.segment_path = "/infra/segments/$NetworkSegmentName"
+			$t0GatewayInterfaceAddResult = $t0GatewayInterfaceSpec.subnets.Add($subnetSpec)
+			$t0GatewayInterfaceSpec.type = "EXTERNAL"
+			$edgeClusterNodePaths = $policyEdgeClusterPath + "/edge-nodes/" + $edgeClusterMember
+			if($debug) { "EdgeClusterNodePath: $edgeClusterNodePaths" | Out-File -Append -LiteralPath $verboseLogFile }
+			$t0GatewayInterfaceSpec.edge_path = $edgeClusterNodePaths
+			$t0GatewayInterfaceSpec.resource_type = "Tier0Interface"
+			$t0GatewayInterface = $t0GatewayInterfacePolicyService.update($T0GatewayName,"default",$t0GatewayInterfaceId,$t0GatewayInterfaceSpec)
+		}
     }
 
     if($runT0StaticRoute) {
@@ -1675,7 +1698,7 @@ if($postDeployNSXConfig -eq 1) {
         $staticRoutePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.static_routes"
         $t0GatewayInterfacePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.locale_services.interfaces"
 
-        $scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayName,"default").results | where {$_.resource_type -eq "Tier0Interface"} | Select -First 1).path
+        $scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayName,"default").results | where {$_.resource_type -eq "Tier0Interface"}).path
 
         $nextHopSpec = $staticRoutePolicyService.help.patch.static_routes.next_hops.Element.Create()
         $nextHopSpec.admin_distance = "1"
@@ -1765,21 +1788,19 @@ if($deployT0VRFconfig -eq 1) {
         $edgeClusterService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters"
 
         $edgeCluster = ($edgeClusterService.list().results | where {$_.display_name -eq $EdgeClusterName})
-        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.member_index[0]
-        if($debug) { "EdgeClusterMember: ${edgeClusterMember}" | Out-File -Append -LiteralPath $verboseLogFile }
+        $edgeClusterMembers = ($edgeClusterService.get($edgeCluster.id)).members
+        if($debug) { "EdgeClusterMember: ${edgeClusterMembers}" | Out-File -Append -LiteralPath $verboseLogFile }
 
         $policyEdgeCluster = ($edgeClusterPolicyService.list("default","default").results | where {$_.display_name -eq $EdgeClusterName})
         $policyEdgeClusterPath = $policyEdgeCluster.path
         if($debug) { "EdgeClusterPath: $policyEdgeClusterPath" | Out-File -Append -LiteralPath $verboseLogFile }
 
-        $edgeClusterNodePath = $policyEdgeClusterPath + "/edge-nodes/" + $edgeClusterMember
-        if($debug) { "EdgeClusterNodePath: $edgeClusterNodePath" | Out-File -Append -LiteralPath $verboseLogFile }
 		
         $t0GatewayVRFSpec = $t0GatewayVRFPolicyService.help.patch.tier0.Create()
         $t0GatewayVRFSpec.display_name = $T0GatewayVRFName
 		$t0GatewayVRFSpec.vrf_config.tier0_path = "/infra/tier-0s/$T0GatewayName" #only new line between T0 and T0 VRF is it need the path to parent T0
-        $t0GatewayVRFSpec.ha_mode = "ACTIVE_STANDBY"
-        $t0GatewayVRFSpec.failover_mode = "NON_PREEMPTIVE"
+        $t0GatewayVRFSpec.ha_mode = "ACTIVE_ACTIVE"
+        #$t0GatewayVRFSpec.failover_mode = "NON_PREEMPTIVE"
         $t0GatewayVRF = $t0GatewayVRFPolicyService.update($T0GatewayVRFName,$t0GatewayVRFSpec)
 
         $localeServiceSpec = $t0GatewayLocalePolicyService.help.patch.locale_services.create()
@@ -1787,30 +1808,39 @@ if($deployT0VRFconfig -eq 1) {
         $localeServiceSpec.edge_cluster_path = $policyEdgeClusterPath
         $localeService = $t0GatewayLocalePolicyService.patch($T0GatewayVRFName,"default",$localeServiceSpec)
 
-        $t0GatewayVRFInterfaceSpec = $t0GatewayVRFInterfacePolicyService.help.update.tier0_interface.Create()
-        $t0GatewayVRFInterfaceId = ([guid]::NewGuid()).Guid
-        $subnetSpec = $t0GatewayVRFInterfacePolicyService.help.update.tier0_interface.subnets.Element.Create()
-        $subnetSpec.ip_addresses = @($T0GatewayVRFInterfaceAddress)
-        $subnetSpec.prefix_len = $T0GatewayVRFInterfacePrefix
-        $t0GatewayVRFInterfaceSpec.segment_path = "/infra/segments/$NetworkSegmentProjectVRF"
-        $t0GatewayVRFInterfaceAddResult = $t0GatewayVRFInterfaceSpec.subnets.Add($subnetSpec)
-        $t0GatewayVRFInterfaceSpec.type = "EXTERNAL"
-        $t0GatewayVRFInterfaceSpec.edge_path = $edgeClusterNodePath
-        $t0GatewayVRFInterfaceSpec.resource_type = "Tier0Interface"
-        $t0GatewayVRFInterface = $t0GatewayVRFInterfacePolicyService.update($T0GatewayVRFName,"default",$t0GatewayVRFInterfaceId,$t0GatewayVRFInterfaceSpec)
+        My-Logger "Creating External T0 VRF Gateway Interface ..."		
+
+        foreach ($edgeClusterMember in @($edgeClusterMembers.member_index)) {
+			$t0GatewayVRFInterfaceSpec = $t0GatewayVRFInterfacePolicyService.help.update.tier0_interface.Create()
+			$t0GatewayVRFInterfaceId = ([guid]::NewGuid()).Guid
+			$subnetSpec = $t0GatewayVRFInterfacePolicyService.help.update.tier0_interface.subnets.Element.Create()
+			$subnetSpec.ip_addresses = @($T0GatewayVRFInterfaceAddresses.Get($edgeClusterMember))
+			$subnetSpec.prefix_len = $T0GatewayVRFInterfacePrefix
+			$t0GatewayVRFInterfaceSpec.segment_path = "/infra/segments/$NetworkSegmentProjectVRF"
+			$t0GatewayVRFInterfaceAddResult = $t0GatewayVRFInterfaceSpec.subnets.Add($subnetSpec)
+			$t0GatewayVRFInterfaceSpec.type = "EXTERNAL"
+			$edgeClusterNodePaths = $policyEdgeClusterPath + "/edge-nodes/" + $edgeClusterMember
+			if($debug) { "EdgeClusterNodePath: $edgeClusterNodePaths" | Out-File -Append -LiteralPath $verboseLogFile }
+			$t0GatewayVRFInterfaceSpec.edge_path = $edgeClusterNodePaths
+			$t0GatewayVRFInterfaceSpec.resource_type = "Tier0Interface"
+			$t0GatewayVRFInterface = $t0GatewayVRFInterfacePolicyService.update($T0GatewayVRFName,"default",$t0GatewayVRFInterfaceId,$t0GatewayVRFInterfaceSpec)
+		}
     }
 	
 	if($runT0VRFStaticRoute) {
-        My-Logger "Adding Static Route on T0 Gateway VRF $VRF Interface from $T0GatewayVRFInterfaceStaticRouteNetwork to $T0GatewayVRFInterfaceStaticRouteAddress ..."
+		My-Logger "Adding default Static Route with nexthop ip NULL and scope $T0GatewayName"
+        #My-Logger "Adding Static Route on T0 Gateway VRF $VRF Interface from $T0GatewayVRFInterfaceStaticRouteNetwork to $T0GatewayVRFInterfaceStaticRouteAddress ..."
 
         $staticRoutePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.static_routes"
 		$t0GatewayInterfacePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.locale_services.interfaces"
+		$t0GatewayPolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier0s"
 
-        $scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayVRFName,"default").results | where {$_.resource_type -eq "Tier0Interface"} | Select -First 1).path
+        $scopePath = ($t0GatewayPolicyService.list().results | where {$_.display_name -eq $T0GatewayName}).path
+        #$scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayVRFName,"default").results | where {$_.resource_type -eq "Tier0Interface"} | Select -First 1).path
 
         $nextHopSpec = $staticRoutePolicyService.help.patch.static_routes.next_hops.Element.Create()
         $nextHopSpec.admin_distance = "1"
-        $nextHopSpec.ip_address = $T0GatewayVRFInterfaceStaticRouteAddress
+        #$nextHopSpec.ip_address = $T0GatewayVRFInterfaceStaticRouteAddress
 
 		$nextHopSpec.scope = @($scopePath)
 
@@ -1857,7 +1887,7 @@ if($deployProject -eq 1) {
         My-Logger "Successfully logged into NSX-T Manager $NSXTMgrHostname  ..."
     }
 	
-	My-Logger "Create NSX Project $ProjectName via VMware.Sdk.Nsx.Policy PowerCLI Module 4.1.0.21605558"	
+	My-Logger "Create NSX Project $ProjectName via VMware.Sdk.Nsx.Policy PowerCLI Module"	
 	$SdkPolicyEdgeCluster = ((Invoke-ListEdgeClustersForEnforcementPoint -siteId "default" -EnforcementpointId "default").Results | where {$_.DisplayName -eq $EdgeClusterName})
 	$SdkPolicyEdgeClusterPath = $SdkPolicyEdgeCluster.Path	
 	$SiteInfo = Initialize-SiteInfo -EdgeClusterPaths $SdkpolicyEdgeClusterPath -SitePath "/infra/sites/default"

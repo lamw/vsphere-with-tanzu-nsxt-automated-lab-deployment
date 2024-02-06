@@ -27,6 +27,17 @@ You are now ready to get your K8s on! 😁
 ![](screenshots/diagram.png)
 
 ## Changelog
+* **01/21/2024**
+ * Updated to support T0 Active-Active to scale out, now require 2 edge nodes minimum and up to 10
+ * Doubled Host TEP (vmnic3,vmnic4), Edge TEP (fp-eth0,fp-eth3) and Edge Uplink (fp-eth1,fp-eth2) with Loadbalancing Source ID
+ * Doubled TEP IP Pool from 10 to 20 IPs
+ * Enable Multiple Lab vApp Deployment on the same Cluster with requirement to rename other "tanzu-vcsa-4" VM before redeploying
+ * Not tested: Changed T0 VRF default route to T0 scope with NULL address
+ * Not tested: Guest Namespace running on T0 VRF Network Settings, default T0 Supervisor Network Setting work fine
+ * Increased pause from 30s to 60s before VSAN Diskgroup creation
+ * Added 60s pause after adding the 2 HTEP vmnics of ESXi to VDS
+ * Updated the download VMware vCenter Server description to latest build 8.0U1d in ## Requirements section
+ * Updated NTP address to use GeoIP DNS localised "pool.ntp.org"
 * **11/07/2023**
  * Updated for vSphere 8.0 and NSX 4.1.1 due to API changes since vSphere 7 and NSX 3
  * Added a few checks to allow reuse of existing objects like vCenter VDS, VDPortGroup, StoragePolicy, Tag and TagCategory, NSX TransportNodeProfile.
@@ -87,7 +98,7 @@ You are now ready to get your K8s on! 😁
 * [VMware Cloud Foundation Licenses](https://docs.vmware.com/en/VMware-vSphere/7.0/vmware-vsphere-with-kubernetes/GUID-9A190942-BDB1-4A19-BA09-728820A716F2.html)
 * Desktop (Windows, Mac or Linux) with latest PowerShell Core and PowerCLI 13.0 Core installed. See [instructions here](https://blogs.vmware.com/PowerCLI/2018/03/installing-powercli-10-0-0-macos.html) for more details
 * vSphere 8 & NSX-T 4 OVAs:
-    * [VMware vCenter Server 8.0U1a Build 21815093](http://www.vmware.com/go/evaluate-vsphere-en)
+    * [VMware vCenter Server 8.0U1d Build 22368047](http://www.vmware.com/go/evaluate-vsphere-en)
     * [NSX-T Unified Appliance 4.1.2 OVA - Build 22589037](http://www.vmware.com/go/try-nsx-t-en)
     * [NSX-T Edge 4.1.2 OVA - Build 22589037](http://www.vmware.com/go/try-nsx-t-en)
     * [Nested ESXi 8.0 Update 1a OVA - Build 21813344](https://download3.vmware.com/software/vmw-tools/nested-esxi/Nested_ESXi8.0u1a_Appliance_Template_v1.ova)
