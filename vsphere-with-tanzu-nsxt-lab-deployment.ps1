@@ -1698,7 +1698,7 @@ if($postDeployNSXConfig -eq 1) {
         $staticRoutePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.static_routes"
         $t0GatewayInterfacePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.locale_services.interfaces"
 
-        $scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayName,"default").results | where {$_.resource_type -eq "Tier0Interface"} | Select -First 1).path
+        $scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayName,"default").results | where {$_.resource_type -eq "Tier0Interface"}).path
 
         $nextHopSpec = $staticRoutePolicyService.help.patch.static_routes.next_hops.Element.Create()
         $nextHopSpec.admin_distance = "1"
