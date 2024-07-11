@@ -1,16 +1,18 @@
 # Author: William Lam
 # Website: www.williamlam.com
+# Contributors: Abbed Sedkaoui
+# Website: www.strivevirtually.net
 
 # vCenter Server used to deploy vSphere with Kubernetes Lab
-$VIServer = "mgmt-vcsa-01.cpbu.corp"
+$VIServer = "192.168.1.50"
 $VIUsername = "administrator@vsphere.local"
 $VIPassword = "VMware1!"
 
-# Full Path to both the Nested ESXi 7.0 VA, Extracted VCSA 7.0 ISO & NSX-T OVAs
-$NestedESXiApplianceOVA = "C:\Users\william\Desktop\Tanzu\Nested_ESXi7.0u1_Appliance_Template_v1.ova"
-$VCSAInstallerPath = "C:\Users\william\Desktop\Tanzu\VMware-VCSA-all-7.0.1-16860138"
-$NSXTManagerOVA = "C:\Users\william\Desktop\Tanzu\nsx-unified-appliance-3.1.1.0.0.17483186.ova"
-$NSXTEdgeOVA = "C:\Users\william\Desktop\Tanzu\nsx-edge-3.1.1.0.0.17483065.ova"
+# Full Path to both the Nested ESXi 8.0 VA, Extracted VCSA 8.0 ISO & NSX-T 4.1.1 OVAs
+$NestedESXiApplianceOVA = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\Nested_ESXi8.0u1a_Appliance_Template_v1.ova"
+$VCSAInstallerPath = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\VMware-VCSA-all-8.0.1-22088981"
+$NSXTManagerOVA = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\nsx-unified-appliance-4.1.2.0.0.22589293-le.ova"
+$NSXTEdgeOVA = "N:\ISOs\vsphere-with-tanzu-nsxt-automated-lab-deployment-master\nsx-edge-4.1.2.0.0.22589297-le.ova"
 
 # TKG Content Library URL
 $TKGContentLibraryName = "TKG-Content-Library"
@@ -18,22 +20,23 @@ $TKGContentLibraryURL = "https://wp-content.vmware.com/v2/latest/lib.json"
 
 # Nested ESXi VMs to deploy
 $NestedESXiHostnameToIPs = @{
-    "tanzu-esxi-7" = "172.17.31.113"
-    "tanzu-esxi-8" = "172.17.31.114"
-    "tanzu-esxi-9" = "172.17.31.115"
-}
+	"tanzu-esxi-7" = "192.168.1.113"
+	#"tanzu-esxi-8" = "192.168.1.114"
+	#"tanzu-esxi-9" = "192.168.1.115"
+	}
 
 # Nested ESXi VM Resources
-$NestedESXivCPU = "4"
+$NestedESXivCPU = "8"
 $NestedESXivMEM = "24" #GB
 $NestedESXiCachingvDisk = "8" #GB
-$NestedESXiCapacityvDisk = "100" #GB
+$NestedESXiCapacityvDisk = "400" #GB
+$NestedESXiBootDisk = "32" #GB
 
 # VCSA Deployment Configuration
 $VCSADeploymentSize = "tiny"
-$VCSADisplayName = "tanzu-vcsa-3"
-$VCSAIPAddress = "172.17.31.112"
-$VCSAHostname = "tanzu-vcsa-3.cpbu.corp" #Change to IP if you don't have valid DNS
+$VCSADisplayName = "tanzu-vcsa-4"
+$VCSAIPAddress = "192.168.1.112"
+$VCSAHostname = "tanzu-vcsa-4.abidi.systems" #Change to IP if you don't have valid DNS
 $VCSAPrefix = "24"
 $VCSASSODomainName = "vsphere.local"
 $VCSASSOPassword = "VMware1!"
@@ -41,17 +44,17 @@ $VCSARootPassword = "VMware1!"
 $VCSASSHEnable = "true"
 
 # General Deployment Configuration for Nested ESXi, VCSA & NSX VMs
-$VMDatacenter = "San Jose"
+$VMDatacenter = "TLS-Datacenter"
 $VMCluster = "Cluster-01"
-$VMNetwork = "SJC-CORP-MGMT"
-$VMDatastore = "vsanDatastore"
+$VMNetwork = "ABD-CORP-MGMT"
+$VMDatastore = "datastore1"
 $VMNetmask = "255.255.255.0"
-$VMGateway = "172.17.31.253"
-$VMDNS = "172.17.31.5"
-$VMNTP = "pool.ntp.org"
+$VMGateway = "192.168.1.253"
+$VMDNS = "192.168.1.100"
+$VMNTP = "192.168.1.253"
 $VMPassword = "VMware1!"
-$VMDomain = "cpbu.corp"
-$VMSyslog = "172.17.31.112"
+$VMDomain = "abidi.systems"
+$VMSyslog = "192.168.1.112"
 $VMFolder = "Tanzu"
 # Applicable to Nested ESXi only
 $VMSSH = "true"
@@ -59,15 +62,17 @@ $VMVMFS = "false"
 
 # Name of new vSphere Datacenter/Cluster when VCSA is deployed
 $NewVCDatacenterName = "Tanzu-Datacenter"
-$NewVCVSANClusterName = "Workload-Cluster"
+$NewVCVSANClusterName = "Workload-Cluster-1"
 $NewVCVDSName = "Tanzu-VDS"
 $NewVCDVPGName = "DVPG-Management Network"
+$vsanDatastoreName = "vsanDatastore-1"
 
 # Tanzu Configuration
 $StoragePolicyName = "tanzu-gold-storage-policy"
 $StoragePolicyTagCategory = "tanzu-demo-tag-category"
 $StoragePolicyTagName = "tanzu-demo-storage"
-$DevOpsUsername = "devops"
+$hostFailuresToTolerate = 0 # 0-3, number of host failure to tolerate, default is 1 failure with 3 nodes, 0 allow single node VSAN
+$DevOpsUsername = "devops-1"
 $DevOpsPassword = "VMware1!"
 
 # NSX-T Configuration
@@ -94,21 +99,54 @@ $TunnelEndpointGateway = "172.30.1.1"
 
 # Transport Zones
 $OverlayTransportZoneName = "TZ-Overlay"
-$OverlayTransportZoneHostSwitchName = "nsxswitch"
+$OverlayTransportZoneHostSwitchName = "nsxHostSwitch"
 $VlanTransportZoneName = "TZ-VLAN"
 $VlanTransportZoneNameHostSwitchName = "edgeswitch"
 
 # Network Segment
 $NetworkSegmentName = "Tanzu-Segment"
 $NetworkSegmentVlan = "0"
+# Project ,Public Ip Block, Private Ip Block
+$ProjectName = "Project-160"
+$ShortId = "PRJ160"
+$ProjectPUBipblockName = "VRF-160-192-168-1-160-27"
+$ProjectPUBcidr = "192.168.1.160/27" # Maximum 5 Public Ip Block per Project
+$VpcProjectPRIVipblockName = "VRF-160-10-10-160-0-23"
+$VpcProjectPRIVcidr = "10.10.160.0/23"
+
+# VPC, Public Subnet, Private Subnet
+$VpcName = "VPC-160"
+$VpcPublicSubnet = "192-168-1-176-28"
+$VpcPublicSubnetIpaddresses = "192.168.1.176/28" # Must be subset of Project Public cidr, and can't use the first or last subnet block size 
+$VpcPublicSubnetSize = 16 # Minimum 16
+$VpcPrivateSubnet = "10-10-160-0-24"
+$VpcPrivateSubnetIpaddresses = "10.10.160.0/24" # Must be subset of Project Private cidr
+$VpcPrivateSubnetSize = 256 # Minimum 16
+
 
 # T0 Gateway
 $T0GatewayName = "Tanzu-T0-Gateway"
-$T0GatewayInterfaceAddress = "172.17.31.119" # should be a routable address
+$T0GatewayInterfaceAddress = "192.168.1.119" # should be a routable address
 $T0GatewayInterfacePrefix = "24"
 $T0GatewayInterfaceStaticRouteName = "Tanzu-Static-Route"
 $T0GatewayInterfaceStaticRouteNetwork = "0.0.0.0/0"
-$T0GatewayInterfaceStaticRouteAddress = "172.17.31.253"
+$T0GatewayInterfaceStaticRouteAddress = "192.168.1.253"
+
+# T0 VRF Gateway
+$VRF = "0" #any integer from 0-4094 
+$NetworkSegmentProjectVRF = "$ProjectName-$VRF"
+$NetworkSegmentVlanProjectVRF = "$VRF" #any integer from 0-4094 or the variable $VRF if it's an integer
+$NetworkSegmentProjectVRFSubnetGw = "192.168.2.177/28"
+
+$T0GatewayVRFName = "T0-$ProjectName-$VRF-Gateway"
+$T0GatewayVRFInterfaceAddress = "192.168.2.190" # should be a routable address on the vrf's vlan
+$T0GatewayVRFInterfacePrefix = "28"
+$T0GatewayVRFInterfaceStaticRouteName = "T0-$ProjectName-$VRF-Static-Route" # note T0 scope is add to to T0VRF scope
+$T0GatewayVRFInterfaceStaticRouteNetwork = "0.0.0.0/0"
+$T0GatewayVRFInterfaceStaticRouteAddress = "192.168.2.177"
+
+# Which T0 to use for the Project External connectivity : $T0GatewayName or $T0GatewayVRFName
+$ProjectT0 = $T0GatewayVRFName
 
 # Uplink Profiles
 $ESXiUplinkProfileName = "ESXi-Host-Uplink-Profile"
@@ -123,7 +161,14 @@ $EdgeOverlayUplinkProfileActivepNIC = "fp-eth1"
 $EdgeUplinkName = "tep-uplink"
 $EdgeUplinkProfileActivepNIC = "fp-eth2"
 $EdgeUplinkProfileTransportVLAN = "0"
-$EdgeUplinkProfileMTU = "1600"
+
+$EdgeUplinkProfileNameVRF = "Edge-Uplink-Profile-$VRF"
+$EdgeUplinkProfileTransportVLANVRF = "$VRF"
+$EdgeUplinkProfileMTU = "1700"
+
+
+$Orgs = "default"
+
 
 # Edge Cluster
 $EdgeClusterName = "Edge-Cluster-01"
@@ -132,17 +177,19 @@ $EdgeClusterName = "Edge-Cluster-01"
 $NSXTMgrDeploymentSize = "small"
 $NSXTMgrvCPU = "6" #override default size
 $NSXTMgrvMEM = "24" #override default size
-$NSXTMgrDisplayName = "tanzu-nsx-3"
-$NSXTMgrHostname = "tanzu-nsx-3.cpbu.corp"
-$NSXTMgrIPAddress = "172.17.31.118"
+$NSXTMgrDisplayName = "tanzu-nsx-4"
+$NSXTMgrHostname = "tanzu-nsx-4.abidi.systems"
+$NSXTMgrIPAddress = "192.168.1.118"
 
 # NSX-T Edge Configuration
 $NSXTEdgeDeploymentSize = "medium"
-$NSXTEdgevCPU = "8" #override default size
-$NSXTEdgevMEM = "32" #override default size
+$NSXTEdgevCPU = "4" #override default size
+$NSXTEdgevMEM = "8" #override default size
 $NSXTEdgeHostnameToIPs = @{
-    "tanzu-nsx-edge-3a" = "172.17.31.116"
+    "tanzu-nsx-edge1-4a" = "192.168.1.116"
+	#"tanzu-nsx-edge2-4a" = "192.168.1.117"
 }
+$NSXTEdgeAmdZenPause = 0 # Pause the script to workaround for AMD Zen DPDK FastPath Capable following https://williamlam.com/2020/05/configure-nsx-t-edge-to-run-on-amd-ryzen-cpu.html
 
 # Advanced Configurations
 # Set to 1 only if you have DNS (forward/reverse) for ESXi hostnames
@@ -171,6 +218,12 @@ $deployNSXEdge = 1
 $postDeployNSXConfig = 1
 $setupTanzu = 1
 $moveVMsIntovApp = 1
+
+$deployProjectExternalIPBlocksConfig = 0
+$deployProject = 0
+$deployVpc = 0
+$deployVpcSubnetPublic = 0
+$deployVpcSubnetPrivate = 0
 
 $vcsaSize2MemoryStorageMap = @{
 "tiny"=@{"cpu"="2";"mem"="12";"disk"="415"};
@@ -452,50 +505,68 @@ if($confirmDeployment -eq 1) {
     Write-Host -ForegroundColor White $VMCluster
     Write-Host -NoNewline -ForegroundColor Green "VM vApp: "
     Write-Host -ForegroundColor White $VAppName
+	
+	if($deployNestedESXiVMs -eq 1) {
+		Write-Host -ForegroundColor Yellow "`n---- vESXi Configuration ----"
+		Write-Host -NoNewline -ForegroundColor Green "# of Nested ESXi VMs: "
+		Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.count
+		Write-Host -NoNewline -ForegroundColor Green "vCPU: "
+		Write-Host -ForegroundColor White $NestedESXivCPU
+		Write-Host -NoNewline -ForegroundColor Green "vMEM: "
+		Write-Host -ForegroundColor White "$NestedESXivMEM GB"
+		Write-Host -NoNewline -ForegroundColor Green "Caching VMDK: "
+		Write-Host -ForegroundColor White "$NestedESXiCachingvDisk GB"
+		Write-Host -NoNewline -ForegroundColor Green "Capacity VMDK: "
+		Write-Host -ForegroundColor White "$NestedESXiCapacityvDisk GB"
+		Write-Host -NoNewline -ForegroundColor Green "Hostname(s): "
+		Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.Keys
+		Write-Host -NoNewline -ForegroundColor Green "IP Address(s): "
+		Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.Values
+		Write-Host -NoNewline -ForegroundColor Green "Netmask "
+		Write-Host -ForegroundColor White $VMNetmask
+		Write-Host -NoNewline -ForegroundColor Green "Gateway: "
+		Write-Host -ForegroundColor White $VMGateway
+		Write-Host -NoNewline -ForegroundColor Green "DNS: "
+		Write-Host -ForegroundColor White $VMDNS
+		Write-Host -NoNewline -ForegroundColor Green "NTP: "
+		Write-Host -ForegroundColor White $VMNTP
+		Write-Host -NoNewline -ForegroundColor Green "Syslog: "
+		Write-Host -ForegroundColor White $VMSyslog
+		Write-Host -NoNewline -ForegroundColor Green "Enable SSH: "
+		Write-Host -ForegroundColor White $VMSSH
+		Write-Host -NoNewline -ForegroundColor Green "Create VMFS Volume: "
+		Write-Host -ForegroundColor White $VMVMFS
+	}
 
-    Write-Host -ForegroundColor Yellow "`n---- vESXi Configuration ----"
-    Write-Host -NoNewline -ForegroundColor Green "# of Nested ESXi VMs: "
-    Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.count
-    Write-Host -NoNewline -ForegroundColor Green "vCPU: "
-    Write-Host -ForegroundColor White $NestedESXivCPU
-    Write-Host -NoNewline -ForegroundColor Green "vMEM: "
-    Write-Host -ForegroundColor White "$NestedESXivMEM GB"
-    Write-Host -NoNewline -ForegroundColor Green "Caching VMDK: "
-    Write-Host -ForegroundColor White "$NestedESXiCachingvDisk GB"
-    Write-Host -NoNewline -ForegroundColor Green "Capacity VMDK: "
-    Write-Host -ForegroundColor White "$NestedESXiCapacityvDisk GB"
-    Write-Host -NoNewline -ForegroundColor Green "IP Address(s): "
-    Write-Host -ForegroundColor White $NestedESXiHostnameToIPs.Values
-    Write-Host -NoNewline -ForegroundColor Green "Netmask "
-    Write-Host -ForegroundColor White $VMNetmask
-    Write-Host -NoNewline -ForegroundColor Green "Gateway: "
-    Write-Host -ForegroundColor White $VMGateway
-    Write-Host -NoNewline -ForegroundColor Green "DNS: "
-    Write-Host -ForegroundColor White $VMDNS
-    Write-Host -NoNewline -ForegroundColor Green "NTP: "
-    Write-Host -ForegroundColor White $VMNTP
-    Write-Host -NoNewline -ForegroundColor Green "Syslog: "
-    Write-Host -ForegroundColor White $VMSyslog
-    Write-Host -NoNewline -ForegroundColor Green "Enable SSH: "
-    Write-Host -ForegroundColor White $VMSSH
-    Write-Host -NoNewline -ForegroundColor Green "Create VMFS Volume: "
-    Write-Host -ForegroundColor White $VMVMFS
-
-    Write-Host -ForegroundColor Yellow "`n---- VCSA Configuration ----"
-    Write-Host -NoNewline -ForegroundColor Green "Deployment Size: "
-    Write-Host -ForegroundColor White $VCSADeploymentSize
-    Write-Host -NoNewline -ForegroundColor Green "SSO Domain: "
-    Write-Host -ForegroundColor White $VCSASSODomainName
-    Write-Host -NoNewline -ForegroundColor Green "Enable SSH: "
-    Write-Host -ForegroundColor White $VCSASSHEnable
-    Write-Host -NoNewline -ForegroundColor Green "Hostname: "
-    Write-Host -ForegroundColor White $VCSAHostname
-    Write-Host -NoNewline -ForegroundColor Green "IP Address: "
-    Write-Host -ForegroundColor White $VCSAIPAddress
-    Write-Host -NoNewline -ForegroundColor Green "Netmask "
-    Write-Host -ForegroundColor White $VMNetmask
-    Write-Host -NoNewline -ForegroundColor Green "Gateway: "
-    Write-Host -ForegroundColor White $VMGateway
+	if($deployVCSA -eq 1) {
+		Write-Host -ForegroundColor Yellow "`n---- VCSA Configuration ----"
+		Write-Host -NoNewline -ForegroundColor Green "Deployment Size: "
+		Write-Host -ForegroundColor White $VCSADeploymentSize
+		Write-Host -NoNewline -ForegroundColor Green "SSO Domain: "
+		Write-Host -ForegroundColor White $VCSASSODomainName
+		Write-Host -NoNewline -ForegroundColor Green "Enable SSH: "
+		Write-Host -ForegroundColor White $VCSASSHEnable
+		Write-Host -NoNewline -ForegroundColor Green "Hostname: "
+		Write-Host -ForegroundColor White $VCSAHostname
+		Write-Host -NoNewline -ForegroundColor Green "IP Address: "
+		Write-Host -ForegroundColor White $VCSAIPAddress
+		Write-Host -NoNewline -ForegroundColor Green "Netmask "
+		Write-Host -ForegroundColor White $VMNetmask
+		Write-Host -NoNewline -ForegroundColor Green "Gateway: "
+		Write-Host -ForegroundColor White $VMGateway
+	}
+	
+	if($setupNewVC -eq 1) {
+		Write-Host -ForegroundColor Yellow "`n---- VCSA Setup ----"
+		Write-Host -NoNewline -ForegroundColor Green "VDSwitch: "
+		Write-Host -ForegroundColor White $NewVCVDSName
+		Write-Host -NoNewline -ForegroundColor Green "VDPortgroup: "
+		Write-Host -ForegroundColor White $NewVCDVPGName
+		Write-Host -NoNewline -ForegroundColor Green "Cluster: "
+		Write-Host -ForegroundColor White $NewVCVSANClusterName
+		Write-Host -NoNewline -ForegroundColor Green "Datastore: "
+		Write-Host -ForegroundColor White $vsanDatastoreName
+	}
 
     if($deployNSXManager -eq 1 -or $deployNSXEdge -eq 1) {
         Write-Host -ForegroundColor Yellow "`n---- NSX-T Configuration ----"
@@ -506,8 +577,8 @@ if($confirmDeployment -eq 1) {
 
         if($deployNSXEdge -eq 1) {
             Write-Host -NoNewline -ForegroundColor Green "# of NSX Edge VMs: "
-            Write-Host -ForegroundColor White $NSXTEdgeHostnameToIPs.count
-            Write-Host -NoNewline -ForegroundColor Green "IP Address(s): "
+            Write-Host -NoNewline -ForegroundColor White $NSXTEdgeHostnameToIPs.count
+            Write-Host -NoNewline -ForegroundColor Green " IP Address(s): "
             Write-Host -ForegroundColor White $NSXTEdgeHostnameToIPs.Values
         }
 
@@ -520,6 +591,55 @@ if($confirmDeployment -eq 1) {
         Write-Host -NoNewline -ForegroundColor Green "Enable Root Login: "
         Write-Host -ForegroundColor White $NSXEnableRootLogin
     }
+	
+	if($ProjectT0 -eq $T0GatewayName -or $ProjectT0 -eq $T0GatewayVRFName -and $deployProject -eq 1){
+		Write-Host -ForegroundColor Yellow "`n---- T0/VRF Configuration ----"
+		if($ProjectT0 -eq $T0GatewayName) {
+        Write-Host -NoNewline -ForegroundColor Green "T0 Gateway Name: "
+        Write-Host -ForegroundColor White $T0GatewayName
+		Write-Host -NoNewline -ForegroundColor Green "T0 Gateway Interface: "
+		Write-Host -ForegroundColor White $T0GatewayInterfaceAddress
+		Write-Host -NoNewline -ForegroundColor Green "T0 Gateway Static Route Address: "
+		Write-Host -ForegroundColor White $T0GatewayInterfaceStaticRouteAddress
+		}
+		
+		if($ProjectT0 -eq $T0GatewayVRFName -and $deployProject -eq 1) {
+			Write-Host -NoNewline -ForegroundColor Green "VRF same as VRF Vlan: "
+			Write-Host -NoNewline -ForegroundColor White $VRF
+			Write-Host -NoNewline -ForegroundColor Green " VRF Vlan: "
+			Write-Host -ForegroundColor White $NetworkSegmentVlanProjectVRF
+			Write-Host -NoNewline -ForegroundColor Green "T0 VRF Gateway Name: "
+            Write-Host -ForegroundColor White $T0GatewayVRFName
+			Write-Host -NoNewline -ForegroundColor Green "T0 VRF Gateway Interface: "
+			Write-Host -ForegroundColor White $T0GatewayVRFInterfaceAddress
+			Write-Host -NoNewline -ForegroundColor Green "T0 VRF Gateway Static Route Address: "
+			Write-Host -ForegroundColor White $T0GatewayVRFInterfaceStaticRouteAddress
+			Write-Host -NoNewline -ForegroundColor Green "NSX Project Public IP Addresses: "
+			Write-Host -ForegroundColor White $NetworkSegmentProjectVRFSubnetGw
+			Write-Host -NoNewline -ForegroundColor Green "NSX Project Network Segment: "
+			Write-Host -ForegroundColor White $NetworkSegmentProjectVRF
+		}
+}
+	
+	if($deployProject -eq 1 -and $deployProjectExternalIPBlocksConfig -eq 1 -or $deployVpc -eq 1) {
+		Write-Host -ForegroundColor Yellow "`n---- NSX Project and VPC Configuration ----"
+        Write-Host -NoNewline -ForegroundColor Green "NSX Project Name: "
+        Write-Host -ForegroundColor White $ProjectName
+        Write-Host -NoNewline -ForegroundColor Green "NSX Project Public IP Address(s): "
+        Write-Host -NoNewline -ForegroundColor White $ProjectPUBcidr
+		Write-Host -NoNewline -ForegroundColor Green " NSX Project Private IP Address(s): "
+        Write-Host -ForegroundColor White $VpcProjectPRIVcidr
+		
+		if($deployVpc -eq 1 -and $deployVpcSubnetPublic -eq 1 -and $deployVpcSubnetPrivate -eq 1) {
+            Write-Host -NoNewline -ForegroundColor Green "NSX VPC Name: "
+            Write-Host -ForegroundColor White $VpcName
+            Write-Host -NoNewline -ForegroundColor Green "NSX VPC Public IP Address(s):     "
+            Write-Host -NoNewline -ForegroundColor White $VpcPublicSubnetIpaddresses
+			Write-Host -NoNewline -ForegroundColor Green " NSX VPC Private IP Address(s):     "
+            Write-Host -ForegroundColor White $VpcPrivateSubnetIpaddresses
+		}
+	}
+
 
     $esxiTotalCPU = $NestedESXiHostnameToIPs.count * [int]$NestedESXivCPU
     $esxiTotalMemory = $NestedESXiHostnameToIPs.count * [int]$NestedESXivMEM
@@ -570,6 +690,7 @@ if($confirmDeployment -eq 1) {
         }
     }
 
+	
     Write-Host -ForegroundColor White "---------------------------------------------"
     Write-Host -NoNewline -ForegroundColor Green "Total CPU: "
     Write-Host -ForegroundColor White ($esxiTotalCPU + $vcsaTotalCPU + $nsxManagerTotalCPU + $nsxEdgeTotalCPU)
@@ -625,6 +746,10 @@ if($deployNestedESXiVMs -eq 1) {
             $ovfconfig.common.guestinfo.createvmfs.value = $true
         }
 
+
+        My-Logger "Setting Ignore Invalid vCenter SSL Certificates ..."
+        Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false 
+
         My-Logger "Deploying Nested ESXi VM $VMName ..."
         $vm = Import-VApp -Source $NestedESXiApplianceOVA -OvfConfiguration $ovfconfig -Name $VMName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
 
@@ -645,6 +770,10 @@ if($deployNestedESXiVMs -eq 1) {
             My-Logger "Updating vSAN Cache VMDK size to $NestedESXiCachingvDisk GB & Capacity VMDK size to $NestedESXiCapacityvDisk GB ..."
             Get-HardDisk -Server $viConnection -VM $vm -Name "Hard disk 2" | Set-HardDisk -CapacityGB $NestedESXiCachingvDisk -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
             Get-HardDisk -Server $viConnection -VM $vm -Name "Hard disk 3" | Set-HardDisk -CapacityGB $NestedESXiCapacityvDisk -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
+			
+			My-Logger "Updating vSAN Boot Disk size to $NestedESXiBootDisk GB ..."
+            Get-HardDisk -Server $viConnection -VM $vm -Name "Hard disk 1" | Set-HardDisk -CapacityGB $NestedESXiBootDisk -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
+			
         } else {
             Get-HardDisk -Server $viConnection -VM $vm -Name "Hard disk 3" | Set-HardDisk -CapacityGB $NestedESXiCapacityvDisk -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
         }
@@ -689,7 +818,7 @@ if($deployNSXManager -eq 1) {
     $nsxMgrOvfConfig.Common.nsx_cli_audit_passwd_0.Value = $NSXAuditPassword
 
     My-Logger "Deploying NSX Manager VM $NSXTMgrDisplayName ..."
-    $nsxmgr_vm = Import-VApp -Source $NSXTManagerOVA -OvfConfiguration $nsxMgrOvfConfig -Name $NSXTMgrDisplayName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
+    $nsxmgr_vm = Import-VApp -Source $NSXTManagerOVA -OvfConfiguration $nsxMgrOvfConfig -Name $NSXTMgrDisplayName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin -Force
 
     My-Logger "Updating vCPU Count to $NSXTMgrvCPU & vMEM to $NSXTMgrvMEM GB ..."
     Set-VM -Server $viConnection -VM $nsxmgr_vm -NumCpu $NSXTMgrvCPU -MemoryGB $NSXTMgrvMEM -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
@@ -703,9 +832,9 @@ if($deployNSXManager -eq 1) {
 
 if($deployVCSA -eq 1) {
         if($IsWindows) {
-            $config = (Get-Content -Raw "$($VCSAInstallerPath)\vcsa-cli-installer\templates\install\embedded_vCSA_on_VC.json") | convertfrom-json
+            $config = (Get-Content -Raw "$($VCSAInstallerPath)\vcsa-cli-installer\templates\install\embedded_vCSA_on_VC.json") | ConvertFrom-Json
         } else {
-            $config = (Get-Content -Raw "$($VCSAInstallerPath)/vcsa-cli-installer/templates/install/embedded_vCSA_on_VC.json") | convertfrom-json
+            $config = (Get-Content -Raw "$($VCSAInstallerPath)/vcsa-cli-installer/templates/install/embedded_vCSA_on_VC.json") | ConvertFrom-Json
         }
         $config.'new_vcsa'.vc.hostname = $VIServer
         $config.'new_vcsa'.vc.username = $VIUsername
@@ -737,19 +866,19 @@ if($deployVCSA -eq 1) {
 
         if($IsWindows) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
-            $config | ConvertTo-Json | Set-Content -Path "$($ENV:Temp)\jsontemplate.json"
+            $config | ConvertTo-Json -WarningAction Ignore | Set-Content -Path "$($ENV:Temp)\jsontemplate.json"
 
             My-Logger "Deploying the VCSA ..."
             Invoke-Expression "$($VCSAInstallerPath)\vcsa-cli-installer\win32\vcsa-deploy.exe install --no-esx-ssl-verify --accept-eula --acknowledge-ceip $($ENV:Temp)\jsontemplate.json"| Out-File -Append -LiteralPath $verboseLogFile
         } elseif($IsMacOS) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
-            $config | ConvertTo-Json | Set-Content -Path "$($ENV:TMPDIR)jsontemplate.json"
+            $config | ConvertTo-Json -WarningAction Ignore | Set-Content -Path "$($ENV:TMPDIR)jsontemplate.json"
 
             My-Logger "Deploying the VCSA ..."
             Invoke-Expression "$($VCSAInstallerPath)/vcsa-cli-installer/mac/vcsa-deploy install --no-esx-ssl-verify --accept-eula --acknowledge-ceip $($ENV:TMPDIR)jsontemplate.json"| Out-File -Append -LiteralPath $verboseLogFile
         } elseif ($IsLinux) {
             My-Logger "Creating VCSA JSON Configuration file for deployment ..."
-            $config | ConvertTo-Json | Set-Content -Path "/tmp/jsontemplate.json"
+            $config | ConvertTo-Json -WarningAction Ignore | Set-Content -Path "/tmp/jsontemplate.json"
 
             My-Logger "Deploying the VCSA ..."
             Invoke-Expression "$($VCSAInstallerPath)/vcsa-cli-installer/lin64/vcsa-deploy install --no-esx-ssl-verify --accept-eula --acknowledge-ceip /tmp/jsontemplate.json"| Out-File -Append -LiteralPath $verboseLogFile
@@ -828,7 +957,7 @@ if($deployNSXEdge -eq 1) {
         $nsxEdgeOvfConfig.Common.nsx_cli_audit_passwd_0.Value = $NSXAuditPassword
 
         My-Logger "Deploying NSX Edge VM $VMName ..."
-        $nsxedge_vm = Import-VApp -Source $NSXTEdgeOVA -OvfConfiguration $nsxEdgeOvfConfig -Name $VMName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin
+        $nsxedge_vm = Import-VApp -Source $NSXTEdgeOVA -OvfConfiguration $nsxEdgeOvfConfig -Name $VMName -Location $cluster -VMHost $vmhost -Datastore $datastore -DiskStorageFormat thin -Force
 
         My-Logger "Updating vCPU Count to $NSXTEdgevCPU & vMEM to $NSXTEdgevMEM GB ..."
         Set-VM -Server $viConnection -VM $nsxedge_vm -NumCpu $NSXTEdgevCPU -MemoryGB $NSXTEdgevMEM -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
@@ -841,9 +970,12 @@ if($deployNSXEdge -eq 1) {
 if($moveVMsIntovApp -eq 1) {
     # Check whether DRS is enabled as that is required to create vApp
     if((Get-Cluster -Server $viConnection $cluster).DrsEnabled) {
-        My-Logger "Creating vApp $VAppName ..."
-        $VApp = New-VApp -Name $VAppName -Server $viConnection -Location $cluster
-
+        if(-Not (Get-VApp -Name $VAppName -ErrorAction Ignore)) {
+			My-Logger "Creating vApp $VAppName ..."
+			$VApp = New-VApp -Name $VAppName -Server $viConnection -Location $cluster
+			} else {
+				$VApp = $VAppName
+		}
         if(-Not (Get-Folder $VMFolder -ErrorAction Ignore)) {
             My-Logger "Creating VM Folder $VMFolder ..."
             $folder = New-Folder -Name $VMFolder -Server $viConnection -Location (Get-Datacenter $VMDatacenter | Get-Folder vm)
@@ -921,7 +1053,19 @@ if($setupNewVC -eq 1) {
                 $targetVMHost = $VMName
             }
             My-Logger "Adding ESXi host $targetVMHost to Cluster ..."
+			Start-Sleep -Seconds 180
             Add-VMHost -Server $vc -Location (Get-Cluster -Name $NewVCVSANClusterName) -User "root" -Password $VMPassword -Name $targetVMHost -Force | Out-File -Append -LiteralPath $verboseLogFile
+        }
+		
+		$haRuntime = (Get-Cluster $NewVCVSANClusterName).ExtensionData.RetrieveDasAdvancedRuntimeInfo
+        $totalHaHosts = $haRuntime.TotalHosts
+        $totalHaGoodHosts = $haRuntime.TotalGoodHosts
+        while($totalHaGoodHosts -ne $totalHaHosts) {
+            My-Logger "Waiting for vSphere HA configuration to complete ..."
+            Start-Sleep -Seconds 60
+            $haRuntime = (Get-Cluster $NewVCVSANClusterName).ExtensionData.RetrieveDasAdvancedRuntimeInfo
+            $totalHaHosts = $haRuntime.TotalHosts
+            $totalHaGoodHosts = $haRuntime.TotalGoodHosts
         }
     }
 
@@ -929,7 +1073,7 @@ if($setupNewVC -eq 1) {
         My-Logger "Enabling VSAN & disabling VSAN Health Check ..."
         Get-VsanClusterConfiguration -Server $vc -Cluster $NewVCVSANClusterName | Set-VsanClusterConfiguration -HealthCheckIntervalMinutes 0 | Out-File -Append -LiteralPath $verboseLogFile
 
-        foreach ($vmhost in Get-Cluster -Server $vc | Get-VMHost) {
+        foreach ($vmhost in Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost) {
             $luns = $vmhost | Get-ScsiLun | select CanonicalName, CapacityGB
 
             My-Logger "Querying ESXi host disks to create VSAN Diskgroups ..."
@@ -941,34 +1085,44 @@ if($setupNewVC -eq 1) {
                     $vsanCapacityDisk = $lun.CanonicalName
                 }
             }
+			Start-Sleep 30
             My-Logger "Creating VSAN DiskGroup for $vmhost ..."
             New-VsanDiskGroup -Server $vc -VMHost $vmhost -SsdCanonicalName $vsanCacheDisk -DataDiskCanonicalName $vsanCapacityDisk | Out-File -Append -LiteralPath $verboseLogFile
         }
+		$vsanDatastoreCreatedName = ((Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost | Select -First 1 | Get-Datastore) | where {$_.type -eq "VSAN"}).Name
+		My-Logger "Renaming $vsanDatastoreCreatedName as $vsanDatastoreName"
+		((Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost | Select -First 1 | Get-Datastore) | where {$_.type -eq "VSAN"}) | Set-Datastore -Name $vsanDatastoreName | Out-File -Append -LiteralPath $verboseLogFile
     } else {
-        foreach ($vmhost in Get-Cluster -Server $vc | Get-VMHost) {
+        foreach ($vmhost in Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost) {
             $localDS = ($vmhost | Get-Datastore) | where {$_.type -eq "VMFS"}
             $localDS | Set-Datastore -Server $vc -Name "not-supported-datastore" | Out-File -Append -LiteralPath $verboseLogFile
         }
     }
 
     if($configureVDS -eq 1) {
-        $vds = New-VDSwitch -Server $vc  -Name $NewVCVDSName -Location (Get-Datacenter -Name $NewVCDatacenterName) -Mtu 1600
-
-        New-VDPortgroup -Server $vc -Name $NewVCDVPGName -Vds $vds | Out-File -Append -LiteralPath $verboseLogFile
-
-        foreach ($vmhost in Get-Cluster -Server $vc | Get-VMHost) {
-            My-Logger "Adding $vmhost to $NewVCVDSName"
-            $vds | Add-VDSwitchVMHost -VMHost $vmhost | Out-Null
-
-            $vmhostNetworkAdapter = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic1
-            $vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter -Confirm:$false
+		$vds = Get-VDSwitch -Name $NewVCVDSName -Location (Get-Datacenter -Name $NewVCDatacenterName) -ErrorAction Ignore
+		if( -Not $vds) {
+			$vds = New-VDSwitch -Server $vc -Name $NewVCVDSName -Location (Get-Datacenter -Name $NewVCDatacenterName) -Mtu 1700
+		}
+			
+		$p = Get-VDPortgroup -Server $vc -Name $NewVCDVPGName -VDSwitch $NewVCVDSName -ErrorAction Ignore
+		if( -Not $p) {
+			New-VDPortgroup -Server $vc -Name $NewVCDVPGName -VDSwitch $vds | Out-File -Append -LiteralPath $verboseLogFile
+		}
+			
+		foreach ($vmhost in Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost) {
+			My-Logger "Adding $vmhost to $NewVCVDSName"
+			$vds | Add-VDSwitchVMHost -VMHost $vmhost | Out-Null
+				
+			$vmhostNetworkAdapter = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic1
+			$vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter -Confirm:$false
         }
     }
 
     if($clearVSANHealthCheckAlarm -eq 1) {
         My-Logger "Clearing default VSAN Health Check Alarms, not applicable in Nested ESXi env ..."
         $alarmMgr = Get-View AlarmManager -Server $vc
-        Get-Cluster -Server $vc | where {$_.ExtensionData.TriggeredAlarmState} | %{
+        Get-Cluster -Name $NewVCVSANClusterName -Server $vc | where {$_.ExtensionData.TriggeredAlarmState} | %{
             $cluster = $_
             $Cluster.ExtensionData.TriggeredAlarmState | %{
                 $alarmMgr.AcknowledgeAlarm($_.Alarm,$cluster.ExtensionData.MoRef)
@@ -977,11 +1131,11 @@ if($setupNewVC -eq 1) {
         $alarmSpec = New-Object VMware.Vim.AlarmFilterSpec
         $alarmMgr.ClearTriggeredAlarms($alarmSpec)
         
-        Set-VsanClusterConfiguration -Configuration $NewVCVSANClusterName -AddSilentHealthCheck controlleronhcl,vumconfig,vumrecommendation -PerformanceServiceEnabled $true
+        Set-VsanClusterConfiguration -Configuration $NewVCVSANClusterName -AddSilentHealthCheck controlleronhcl,vumconfig,vumrecommendation -PerformanceServiceEnabled $true | Out-File -Append -LiteralPath $verboseLogFile
     }
 
     # Final configure and then exit maintanence mode in case patching was done earlier
-    foreach ($vmhost in Get-Cluster -Server $vc | Get-VMHost) {
+    foreach ($vmhost in Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost) {
         # Disable Core Dump Warning
         Get-AdvancedSetting -Entity $vmhost -Name UserVars.SuppressCoredumpWarning | Set-AdvancedSetting -Value 1 -Confirm:$false | Out-File -Append -LiteralPath $verboseLogFile
 
@@ -995,15 +1149,28 @@ if($setupNewVC -eq 1) {
 
     if($setupTanzuStoragePolicy) {
         if($configureVSANDiskGroup -eq 1) {
-            $datastoreName = "vsanDatastore"
+            $datastoreName = "$vsanDatastoreName"
         } else {
-            $datastoreName = ((Get-Cluster -Server $vc | Get-VMHost | Select -First 1 | Get-Datastore) | where {$_.type -eq "VMFS"}).name
+            $datastoreName = ((Get-Cluster -Name $NewVCVSANClusterName -Server $vc | Get-VMHost | Select -First 1 | Get-Datastore) | where {$_.type -eq "VMFS"}).name
         }
         My-Logger "Creating Tanzu Storage Policies and attaching to $datastoreName ..."
-        New-TagCategory -Server $vc -Name $StoragePolicyTagCategory -Cardinality single -EntityType Datastore | Out-File -Append -LiteralPath $verboseLogFile
-        New-Tag -Server $vc -Name $StoragePolicyTagName -Category $StoragePolicyTagCategory | Out-File -Append -LiteralPath $verboseLogFile
-        Get-Datastore -Server $vc -Name $datastoreName | New-TagAssignment -Server $vc -Tag $StoragePolicyTagName | Out-File -Append -LiteralPath $verboseLogFile
-        New-SpbmStoragePolicy -Server $vc -Name $StoragePolicyName -AnyOfRuleSets (New-SpbmRuleSet -Name "tanzu-ruleset" -AllOfRules (New-SpbmRule -AnyOfTags (Get-Tag $StoragePolicyTagName))) | Out-File -Append -LiteralPath $verboseLogFile
+		$tc = Get-TagCategory -Server $vc -Name $StoragePolicyTagCategory -ErrorAction Ignore
+		if( -Not $tc) {
+			New-TagCategory -Server $vc -Name $StoragePolicyTagCategory -Cardinality single -EntityType Datastore | Out-File -Append -LiteralPath $verboseLogFile
+		}
+		
+		$t = Get-Tag -Server $vc -Name $StoragePolicyTagName -Category $StoragePolicyTagCategory -ErrorAction Ignore
+		if( -Not $t) {
+			New-Tag -Server $vc -Name $StoragePolicyTagName -Category $StoragePolicyTagCategory | Out-File -Append -LiteralPath $verboseLogFile
+		}
+        Get-Datastore -Server $vc -Name $datastoreName -ErrorAction Ignore | New-TagAssignment -Server $vc -Tag $StoragePolicyTagName | Out-File -Append -LiteralPath $verboseLogFile
+		
+		$sp = Get-SpbmStoragePolicy -Server $vc -Name $StoragePolicyName -ErrorAction Ignore
+		if( -Not $sp) {
+			New-SpbmStoragePolicy -Server $vc -Name $StoragePolicyName -AnyOfRuleSets (New-SpbmRuleSet -Name "tanzu-ruleset" -AllOfRules (New-SpbmRule -AnyOfTags (Get-Tag $StoragePolicyTagName)),(New-SpbmRule -Capability (Get-SpbmCapability -Name "VSAN.hostFailuresToTolerate") -Value $hostFailuresToTolerate),(New-SpbmRule -Capability (Get-SpbmCapability -Name "VSAN.forceProvisioning") -Value $true)) | Out-File -Append -LiteralPath $verboseLogFile
+		}
+		Get-SpbmEntityConfiguration -StoragePolicy $StoragePolicyName
+		Set-SpbmEntityConfiguration -Configuration (Get-SpbmEntityConfiguration $datastoreName) -StoragePolicy $StoragePolicyName | Out-File -Append -LiteralPath $verboseLogFile
     }
 
     if ($setupTKGContentLibrary -eq 1) {
@@ -1013,7 +1180,7 @@ if($setupNewVC -eq 1) {
         $clPort = ([System.Uri]$TKGContentLibraryURL).port
         $clThumbprint = Get-SSLThumbprint -Url "${clScheme}://${clHost}:${clPort}"
 
-        New-ContentLibrary -Server $vc -Name $TKGContentLibraryName -Description "Subscribed TKG Content Library" -Datastore (Get-Datastore -Server $vc "vsanDatastore") -AutomaticSync -SubscriptionUrl $TKGContentLibraryURL -SslThumbprint $clThumbprint | Out-File -Append -LiteralPath $verboseLogFile
+        New-ContentLibrary -Server $vc -Name $TKGContentLibraryName -Description "Subscribed TKG Content Library" -Datastore (Get-Datastore -Server $vc "$vsanDatastoreName") -AutomaticSync -DownloadContentOnDemand -SubscriptionUrl $TKGContentLibraryURL -SslThumbprint $clThumbprint -ErrorAction Ignore | Out-File -Append -LiteralPath $verboseLogFile
     }
 
     My-Logger "Disconnecting from new VCSA ..."
@@ -1038,10 +1205,10 @@ if($postDeployNSXConfig -eq 1) {
     $runTransportNodeProfile=$true
     $runAddEsxiTransportNode=$true
     $runAddEdgeTransportNode=$true
-    $runAddEdgeCluster=$true
+	$runAddEdgeCluster=$true
     $runNetworkSegment=$true
     $runT0Gateway=$true
-    $runT0StaticRoute=$true
+	$runT0StaticRoute=$true
     $registervCenterOIDC=$false
 
     if($runHealth) {
@@ -1135,14 +1302,16 @@ if($postDeployNSXConfig -eq 1) {
         $transportZoneService = Get-NsxtService -Name "com.vmware.nsx.transport_zones"
         $overlayTZSpec = $transportZoneService.help.create.transport_zone.Create()
         $overlayTZSpec.display_name = $OverlayTransportZoneName
-        $overlayTZSpec.host_switch_name = $OverlayTransportZoneHostSwitchName
+        #$overlayTZSpec.host_switch_name = $OverlayTransportZoneHostSwitchName # "host_switch_name" is removed in transport zone from nsx4 API
         $overlayTZSpec.transport_type = "OVERLAY"
+		$overlayTZSpec.is_default = "True"
         $overlayTZ = $transportZoneService.create($overlayTZSpec)
 
         $vlanTZSpec = $transportZoneService.help.create.transport_zone.Create()
         $vlanTZSpec.display_name = $VLANTransportZoneName
-        $vlanTZSpec.host_switch_name = $VlanTransportZoneNameHostSwitchName
+        #$vlanTZSpec.host_switch_name = $VlanTransportZoneNameHostSwitchName # "host_switch_name" is removed in transport zone from nsx4 API
         $vlanTZSpec.transport_type = "VLAN"
+		$vlanTZSpec.is_default = "True"
         $vlanTZ = $transportZoneService.create($vlanTZSpec)
     }
 
@@ -1171,92 +1340,95 @@ if($postDeployNSXConfig -eq 1) {
         $addActiveUplink = $EdgeUplinkProfileSpec.teaming.active_list.Add($activeUplinkSpec)
         $EdgeUplinkProfileSpec.teaming.policy = $EdgeUplinkProfilePolicy
         $EdgeUplinkProfile = $hostSwitchProfileService.create($EdgeUplinkProfileSpec)
-    }
+    }		
 
-    if($runTransportNodeProfile) {
-        $vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+	if($runTransportNodeProfile) {
+		$transportNodeProfileService = Get-NsxtService -Name "com.vmware.nsx.transport_node_profiles"
+	    $tnp = $transportNodeProfileService.list().results | where {$_.display_name -eq $TransportNodeProfileName} -ErrorAction Ignore
+		if( -Not $tnp) {
+			$vc = Connect-VIServer $VCSAIPAddress -User "administrator@$VCSASSODomainName" -Password $VCSASSOPassword -WarningAction SilentlyContinue
+			# Retrieve VDS UUID from vCenter Server
+			$VDS = (Get-VDSwitch -Server $vc -Name $NewVCVDSName).ExtensionData
+			$VDSUuid = $VDS.Uuid
+			Disconnect-VIServer $vc -Confirm:$false
 
-        # Retrieve VDS UUID from vCenter Server
-        $VDS = (Get-VDSwitch -Server $vc -Name $NewVCVDSName).ExtensionData
-        $VDSUuid = $VDS.Uuid
-        Disconnect-VIServer $vc -Confirm:$false
+			$hostswitchProfileService = Get-NsxtService -Name "com.vmware.nsx.host_switch_profiles"
 
-        $hostswitchProfileService = Get-NsxtService -Name "com.vmware.nsx.host_switch_profiles"
+			$ipPool = (Get-NsxtService -Name "com.vmware.nsx.pools.ip_pools").list().results | where { $_.display_name -eq $TunnelEndpointName }
+			$OverlayTZ = (Get-NsxtService -Name "com.vmware.nsx.transport_zones").list().results | where { $_.display_name -eq $OverlayTransportZoneName }
+			$ESXiUplinkProfile = $hostswitchProfileService.list().results | where { $_.display_name -eq $ESXiUplinkProfileName }
 
-        $ipPool = (Get-NsxtService -Name "com.vmware.nsx.pools.ip_pools").list().results | where { $_.display_name -eq $TunnelEndpointName }
-        $OverlayTZ = (Get-NsxtService -Name "com.vmware.nsx.transport_zones").list().results | where { $_.display_name -eq $OverlayTransportZoneName }
-        $ESXiUplinkProfile = $hostswitchProfileService.list().results | where { $_.display_name -eq $ESXiUplinkProfileName }
+			$esxiIpAssignmentSpec = [pscustomobject] @{
+				"resource_type" = "StaticIpPoolSpec";
+				"ip_pool_id" = $ipPool.id;
+			}
 
-        $esxiIpAssignmentSpec = [pscustomobject] @{
-            "resource_type" = "StaticIpPoolSpec";
-            "ip_pool_id" = $ipPool.id;
-        }
+			$edgeIpAssignmentSpec = [pscustomobject] @{
+				"resource_type" = "AssignedByDhcp";
+			}
 
-        $edgeIpAssignmentSpec = [pscustomobject] @{
-            "resource_type" = "AssignedByDhcp";
-        }
+			$hostTransportZoneEndpoints = @(@{"transport_zone_id"=$OverlayTZ.id})
 
-        $hostTransportZoneEndpoints = @(@{"transport_zone_id"=$OverlayTZ.id})
+			$esxiHostswitchSpec = [pscustomobject] @{
+				"host_switch_name" = $OverlayTransportZoneHostSwitchName;
+				"host_switch_mode" = "STANDARD";
+				"host_switch_type" = "VDS";
+				"host_switch_id" = $VDSUuid;
+				"uplinks" = @(@{"uplink_name"=$ESXiUplinkName;"vds_uplink_name"=$ESXiUplinkName})
+				"ip_assignment_spec" = $esxiIpAssignmentSpec;
+				"host_switch_profile_ids" = @(@{"key"="UplinkHostSwitchProfile";"value"=$ESXiUplinkProfile.id})
+				"transport_zone_endpoints" = $hostTransportZoneEndpoints;
+			}
 
-        $esxiHostswitchSpec = [pscustomobject] @{
-            "host_switch_name" = $OverlayTransportZoneHostSwitchName;
-            "host_switch_mode" = "STANDARD";
-            "host_switch_type" = "VDS";
-            "host_switch_id" = $VDSUuid;
-            "uplinks" = @(@{"uplink_name"=$ESXiUplinkName;"vds_uplink_name"=$ESXiUplinkName})
-            "ip_assignment_spec" = $esxiIpAssignmentSpec;
-            "host_switch_profile_ids" = @(@{"key"="UplinkHostSwitchProfile";"value"=$ESXiUplinkProfile.id})
-            "transport_zone_endpoints" = $hostTransportZoneEndpoints;
-        }
+			$json = [pscustomobject] @{
+				"resource_type" = "TransportNodeProfile";
+				"display_name" = $TransportNodeProfileName;
+				"host_switch_spec" = [pscustomobject] @{
+					"host_switches" = @($esxiHostswitchSpec)
+					"resource_type" = "StandardHostSwitchSpec";
+				}
+			}
 
-        $json = [pscustomobject] @{
-            "resource_type" = "TransportNodeProfile";
-            "display_name" = $TransportNodeProfileName;
-            "host_switch_spec" = [pscustomobject] @{
-                "host_switches" = @($esxiHostswitchSpec)
-                "resource_type" = "StandardHostSwitchSpec";
-            }
-        }
+			$body = $json | ConvertTo-Json -Depth 10
 
-        $body = $json | ConvertTo-Json -Depth 10
+			$pair = "${NSXAdminUsername}:${NSXAdminPassword}"
+			$bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+			$base64 = [System.Convert]::ToBase64String($bytes)
 
-        $pair = "${NSXAdminUsername}:${NSXAdminPassword}"
-        $bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
-        $base64 = [System.Convert]::ToBase64String($bytes)
+			$headers = @{
+				"Authorization"="basic $base64"
+				"Content-Type"="application/json"
+				"Accept"="application/json"
+			}
 
-        $headers = @{
-            "Authorization"="basic $base64"
-            "Content-Type"="application/json"
-            "Accept"="application/json"
-        }
+			$transportNodeUrl = "https://$NSXTMgrHostname/api/v1/transport-node-profiles"
 
-        $transportNodeUrl = "https://$NSXTMgrHostname/api/v1/transport-node-profiles"
+			if($debug) {
+				"URL: $transportNodeUrl" | Out-File -Append -LiteralPath $verboseLogFile
+				"Headers: $($headers | Out-String)" | Out-File -Append -LiteralPath $verboseLogFile
+				"Body: $body" | Out-File -Append -LiteralPath $verboseLogFile
+			}
 
-        if($debug) {
-            "URL: $transportNodeUrl" | Out-File -Append -LiteralPath $verboseLogFile
-            "Headers: $($headers | Out-String)" | Out-File -Append -LiteralPath $verboseLogFile
-            "Body: $body" | Out-File -Append -LiteralPath $verboseLogFile
-        }
+			try {
+				My-Logger "Creating Transport Node Profile $TransportNodeProfileName ..."
+				if($PSVersionTable.PSEdition -eq "Core") {
+					$requests = Invoke-WebRequest -Uri $transportNodeUrl -Body $body -Method POST -Headers $headers -SkipCertificateCheck
+				} else {
+					$requests = Invoke-WebRequest -Uri $transportNodeUrl -Body $body -Method POST -Headers $headers
+				}
+			} catch {
+				Write-Error "Error in creating NSX-T Transport Node Profile"
+				Write-Error "`n($_.Exception.Message)`n"
+				break
+			}
 
-        try {
-            My-Logger "Creating Transport Node Profile $TransportNodeProfileName ..."
-            if($PSVersionTable.PSEdition -eq "Core") {
-                $requests = Invoke-WebRequest -Uri $transportNodeUrl -Body $body -Method POST -Headers $headers -SkipCertificateCheck
-            } else {
-                $requests = Invoke-WebRequest -Uri $transportNodeUrl -Body $body -Method POST -Headers $headers
-            }
-        } catch {
-            Write-Error "Error in creating NSX-T Transport Node Profile"
-            Write-Error "`n($_.Exception.Message)`n"
-            break
-        }
-
-        if($requests.StatusCode -eq 201) {
-            My-Logger "Successfully Created Transport Node Profile"
-        } else {
-            My-Logger "Unknown State: $requests"
-        }
-    }
+			if($requests.StatusCode -eq 201) {
+				My-Logger "Successfully Created Transport Node Profile"
+			} else {
+				My-Logger "Unknown State: $requests"
+			}
+		}
+	}
 
     if($runAddEsxiTransportNode) {
         $transportNodeCollectionService = Get-NsxtService -Name "com.vmware.nsx.transport_node_collections"
@@ -1281,6 +1453,11 @@ if($postDeployNSXConfig -eq 1) {
             Start-Sleep 30
         }
     }
+	
+	if($NSXTEdgeAmdZenPause -eq 1) {
+		Write-Host "Press any key to continue..."
+		$Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+	}
 
     if($runAddEdgeTransportNode) {
         $transportNodeService = Get-NsxtService -Name "com.vmware.nsx.transport_nodes"
@@ -1388,7 +1565,11 @@ if($postDeployNSXConfig -eq 1) {
     }
 
     if($runAddEdgeCluster) {
-        $edgeNodes = (Get-NsxtService -Name "com.vmware.nsx.fabric.nodes").list().results | where { $_.resource_type -eq "EdgeNode" }
+		$transportNodeService = Get-NsxtService -Name "com.vmware.nsx.transport_nodes"
+		$edgeNodes = $transportNodeService.list().results | where {$_.node_deployment_info.resource_type -eq "EdgeNode"}
+		##$transportNodes = (Get-NsxtService -Name "com.vmware.nsx.transport_nodes").list().results
+		##$edgeNodes = $transportNodes.node_deployment_info | where { $_.resource_type -eq "EdgeNode" }
+        #$edgeNodes = (Get-NsxtService -Name "com.vmware.nsx.fabric.nodes").list().results | where { $_.resource_type -eq "EdgeNode" } #fabric is removed from nsx4 API
         $edgeClusterService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters"
         $edgeClusterStateService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters.state"
         $edgeNodeMembersSpec = $edgeClusterService.help.create.edge_cluster.members.Create()
@@ -1441,7 +1622,7 @@ if($postDeployNSXConfig -eq 1) {
 
         $segment = $segmentPolicyService.update($NetworkSegmentName,$segmentSpec)
     }
-
+	
     if($runT0Gateway) {
         My-Logger "Creating T0 Gateway $T0GatewayName ..."
 
@@ -1508,7 +1689,7 @@ if($postDeployNSXConfig -eq 1) {
 
         $staticRoute = $staticRoutePolicyService.patch($T0GatewayName,$T0GatewayInterfaceStaticRouteName,$staticRouteSpec)
     }
-
+	
     if($registervCenterOIDC) {
         My-Logger "Registering vCenter Server OIDC Endpoint with NSX-T Manager ..."
 
@@ -1538,6 +1719,305 @@ if($setupTanzu -eq 1) {
     My-Logger "Disconnecting from Management vCenter ..."
     Disconnect-VIServer * -Confirm:$false | Out-Null
 }
+
+if($ProjectT0 -eq $T0GatewayVRFName -and $deployProject -eq 1){
+	$deployT0VRFconfig = 1
+}
+
+if($deployT0VRFconfig -eq 1) {
+	My-Logger "Connecting to NSX-T Manager for T0 VRF Gateway deployment configuration ..."
+    if(!(Connect-NsxtServer -Server $NSXTMgrHostname -Username $NSXAdminUsername -Password $NSXAdminPassword -WarningAction SilentlyContinue)) {
+        Write-Host -ForegroundColor Red "Unable to connect to NSX-T Manager, please check the deployment"
+        exit
+    } else {
+        My-Logger "Successfully logged into NSX-T Manager $NSXTMgrHostname  ..."
+    }
+	
+	$runNetworkSegmentProjectVRF=$true
+	$runT0GatewayVRF=$true
+	$runT0VRFStaticRoute=$true
+	
+	if($runNetworkSegmentProjectVRF) {
+        My-Logger "Creating Network Segment $NetworkSegmentProjectVRF ..."
+
+        $transportZonePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.sites.enforcement_points.transport_zones"
+        $segmentPolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.segments"
+
+        $tzPath = ($transportZonePolicyService.list("default","default").results | where {$_.display_name -eq $OverlayTransportZoneName}).path
+
+        $segmentProjectVRFSpec = $segmentPolicyService.help.update.segment.Create()
+        $segmentProjectVRFSpec.transport_zone_path = $tzPath
+        $segmentProjectVRFSpec.display_name = $NetworkSegmentProjectVRF
+        $segmentProjectVRFSpec.vlan_ids = @($NetworkSegmentVlanProjectVRF)
+		$segmentProjectVRFSpec.subnets = @(@{"gateway_address" = $NetworkSegmentProjectVRFSubnetGw})
+		$segmentProjectVRFSpec.connectivity_path = "/infra/tier-0s/$T0GatewayName"
+
+        $segmentProjectVRF = $segmentPolicyService.update($NetworkSegmentProjectVRF,$segmentProjectVRFSpec)
+    }
+	
+    if($runT0GatewayVRF) {
+		My-Logger "Creating T0 VRF Gateway $T0GatewayVRFName ..."
+		
+		$t0GatewayVRFPolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier0s"
+        $t0GatewayLocalePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.locale_services"
+        $t0GatewayVRFInterfacePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.locale_services.interfaces"
+        $edgeClusterPolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.sites.enforcement_points.edge_clusters"
+        $edgeClusterService = Get-NsxtService -Name "com.vmware.nsx.edge_clusters"
+
+        $edgeCluster = ($edgeClusterService.list().results | where {$_.display_name -eq $EdgeClusterName})
+        $edgeClusterMember = ($edgeClusterService.get($edgeCluster.id)).members.member_index[0]
+        if($debug) { "EdgeClusterMember: ${edgeClusterMember}" | Out-File -Append -LiteralPath $verboseLogFile }
+
+        $policyEdgeCluster = ($edgeClusterPolicyService.list("default","default").results | where {$_.display_name -eq $EdgeClusterName})
+        $policyEdgeClusterPath = $policyEdgeCluster.path
+        if($debug) { "EdgeClusterPath: $policyEdgeClusterPath" | Out-File -Append -LiteralPath $verboseLogFile }
+
+        $edgeClusterNodePath = $policyEdgeClusterPath + "/edge-nodes/" + $edgeClusterMember
+        if($debug) { "EdgeClusterNodePath: $edgeClusterNodePath" | Out-File -Append -LiteralPath $verboseLogFile }
+		
+        $t0GatewayVRFSpec = $t0GatewayVRFPolicyService.help.patch.tier0.Create()
+        $t0GatewayVRFSpec.display_name = $T0GatewayVRFName
+		$t0GatewayVRFSpec.vrf_config.tier0_path = "/infra/tier-0s/$T0GatewayName" #only new line between T0 and T0 VRF is it need the path to parent T0
+        $t0GatewayVRFSpec.ha_mode = "ACTIVE_STANDBY"
+        $t0GatewayVRFSpec.failover_mode = "NON_PREEMPTIVE"
+        $t0GatewayVRF = $t0GatewayVRFPolicyService.update($T0GatewayVRFName,$t0GatewayVRFSpec)
+
+        $localeServiceSpec = $t0GatewayLocalePolicyService.help.patch.locale_services.create()
+        $localeServiceSpec.display_name = "default"
+        $localeServiceSpec.edge_cluster_path = $policyEdgeClusterPath
+        $localeService = $t0GatewayLocalePolicyService.patch($T0GatewayVRFName,"default",$localeServiceSpec)
+
+        $t0GatewayVRFInterfaceSpec = $t0GatewayVRFInterfacePolicyService.help.update.tier0_interface.Create()
+        $t0GatewayVRFInterfaceId = ([guid]::NewGuid()).Guid
+        $subnetSpec = $t0GatewayVRFInterfacePolicyService.help.update.tier0_interface.subnets.Element.Create()
+        $subnetSpec.ip_addresses = @($T0GatewayVRFInterfaceAddress)
+        $subnetSpec.prefix_len = $T0GatewayVRFInterfacePrefix
+        $t0GatewayVRFInterfaceSpec.segment_path = "/infra/segments/$NetworkSegmentProjectVRF"
+        $t0GatewayVRFInterfaceAddResult = $t0GatewayVRFInterfaceSpec.subnets.Add($subnetSpec)
+        $t0GatewayVRFInterfaceSpec.type = "EXTERNAL"
+        $t0GatewayVRFInterfaceSpec.edge_path = $edgeClusterNodePath
+        $t0GatewayVRFInterfaceSpec.resource_type = "Tier0Interface"
+        $t0GatewayVRFInterface = $t0GatewayVRFInterfacePolicyService.update($T0GatewayVRFName,"default",$t0GatewayVRFInterfaceId,$t0GatewayVRFInterfaceSpec)
+    }
+	
+	if($runT0VRFStaticRoute) {
+        My-Logger "Adding Static Route on T0 Gateway VRF $VRF Interface from $T0GatewayVRFInterfaceStaticRouteNetwork to $T0GatewayVRFInterfaceStaticRouteAddress ..."
+
+        $staticRoutePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.static_routes"
+		$t0GatewayInterfacePolicyService = Get-NsxtPolicyService -Name "com.vmware.nsx_policy.infra.tier_0s.locale_services.interfaces"
+
+        $scopePath = ($t0GatewayInterfacePolicyService.list($T0GatewayVRFName,"default").results | where {$_.resource_type -eq "Tier0Interface"} | Select -First 1).path
+
+        $nextHopSpec = $staticRoutePolicyService.help.patch.static_routes.next_hops.Element.Create()
+        $nextHopSpec.admin_distance = "1"
+        $nextHopSpec.ip_address = $T0GatewayVRFInterfaceStaticRouteAddress
+
+		$nextHopSpec.scope = @($scopePath)
+
+        $staticRouteSpec = $staticRoutePolicyService.help.patch.static_routes.Create()
+        $staticRouteSpec.display_name = $T0GatewayVRFInterfaceStaticRouteName
+        $staticRouteSpec.network = $T0GatewayVRFInterfaceStaticRouteNetwork
+        $nextHopeAddResult = $staticRouteSpec.next_hops.Add($nextHopSpec)
+
+        $staticRoute = $staticRoutePolicyService.patch($T0GatewayVRFName,$T0GatewayVRFInterfaceStaticRouteName,$staticRouteSpec)
+    }
+}
+
+if($deployProjectExternalIPBlocksConfig -eq 1) {
+    My-Logger "Connecting to NSX-T Manager for Project and VPC deployment configuration ..."
+    if(!(Connect-NsxtServer -Server $NSXTMgrHostname -Username $NSXAdminUsername -Password $NSXAdminPassword -WarningAction SilentlyContinue)) {
+        Write-Host -ForegroundColor Red "Unable to connect to NSX-T Manager, please check the deployment"
+        exit
+    } else {
+        My-Logger "Successfully logged into NSX-T Manager $NSXTMgrHostname  ..."
+    }
+
+	$ExternalIPBlocks=$true
+
+	if($ExternalIPBlocks) {
+		
+		$PUBip_blocks = Get-NsxtPolicyService -Name com.vmware.nsx_policy.infra.ip_blocks
+		$PUBipblockSpec = $PUBip_blocks.help.patch.ip_address_block.Create($ProjectPUBipblockName)
+		$PUBipblockSpec.id = $ProjectPUBipblockName
+		$PUBipblockSpec.cidr = $ProjectPUBcidr
+		$PUBipblockSpec.visibility = "EXTERNAL"
+		$PUBipblock = $PUBip_blocks.update($ProjectPUBipblockName, $PUBipblockSpec)
+	}
+	
+	My-Logger "Disconnecting from NSX-T Manager ..."
+    Disconnect-NsxtServer -Confirm:$false
+}
+
+
+if($deployProject -eq 1) {
+    if(!(Connect-NsxServer -Server $NSXTMgrHostname -Username $NSXAdminUsername -Password $NSXAdminPassword -WarningAction SilentlyContinue)) {
+        Write-Host -ForegroundColor Red "Unable to connect to NSX-T Manager, please check the deployment"
+        exit
+    } else {
+        My-Logger "Successfully logged into NSX-T Manager $NSXTMgrHostname  ..."
+    }
+	
+	My-Logger "Create NSX Project $ProjectName via VMware.Sdk.Nsx.Policy PowerCLI Module 4.1.0.21605558"	
+	$SdkPolicyEdgeCluster = ((Invoke-ListEdgeClustersForEnforcementPoint -siteId "default" -EnforcementpointId "default").Results | where {$_.DisplayName -eq $EdgeClusterName})
+	$SdkPolicyEdgeClusterPath = $SdkPolicyEdgeCluster.Path	
+	$SiteInfo = Initialize-SiteInfo -EdgeClusterPaths $SdkpolicyEdgeClusterPath -SitePath "/infra/sites/default"
+	$Project = Initialize-Project -Children $ChildPolicyConfigResource -ShortId "$ShortId" -SiteInfos $SiteInfo -Tier0s "/infra/tier-0s/$ProjectT0"	
+	Invoke-PatchProject -orgId "default" -projectId $ProjectName -project $Project
+		
+	My-Logger "Add $ProjectName Private IP Blocks"
+	$IpAddressBlock = Initialize-IpAddressBlock -Description $VpcProjectPRIVipBlockName -Id $VpcProjectPRIVipBlockName -Cidr $VpcProjectPRIVcidr -Visibility "PRIVATE"
+	Invoke-OrgsOrgIdProjectsProjectIdInfraCreateOrPatchIpAddressBlock -orgId $Orgs -projectId $ProjectName -ipBlockId $VpcProjectPRIVipBlockName -ipAddressBlock $ipAddressBlock -Verbose -Debug
+	
+	My-Logger "Add $ProjectName External IP Blocks via API call"
+	$pair = "${NSXAdminUsername}:${NSXAdminPassword}"
+	$bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+	$base64 = [System.Convert]::ToBase64String($bytes)
+
+	$headers = @{
+		"Authorization"="basic $base64"
+		"Content-Type"="application/json"
+		"Accept"="application/json"
+		}
+		
+	$ProjectUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName"
+	$Getrequests = Invoke-WebRequest -Uri $ProjectUrl -Method GET -Headers $headers -SkipCertificateCheck
+	$json = $Getrequests.Content | Out-String | ConvertFrom-Json
+	$json.external_ipv4_blocks = @("/infra/ip-blocks/$ProjectPUBipblockName")
+	$body = $json | ConvertTo-Json -Depth 10
+
+	$Patchrequests = Invoke-WebRequest -Uri $ProjectUrl -Body $body -Method PATCH -Headers $headers -SkipCertificateCheck
+}	
+	
+
+if($deployVpc -eq 1) {
+    if(!(Connect-NsxServer -Server $NSXTMgrHostname -Username $NSXAdminUsername -Password $NSXAdminPassword -WarningAction SilentlyContinue)) {
+        Write-Host -ForegroundColor Red "Unable to connect to NSX-T Manager, please check the deployment"
+        exit
+    } else {
+        My-Logger "Successfully logged into NSX-T Manager $NSXTMgrHostname  ..."
+    }
+	
+	My-Logger "Add $VpcName to $ProjectName via API call"
+	
+	$SdkPolicyEdgeCluster = ((Invoke-ListEdgeClustersForEnforcementPoint -siteId "default" -EnforcementpointId "default").Results | where {$_.DisplayName -eq $EdgeClusterName})
+	$SdkPolicyEdgeClusterPath = $SdkPolicyEdgeCluster.Path
+	
+	$pair = "${NSXAdminUsername}:${NSXAdminPassword}"
+	$bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+	$base64 = [System.Convert]::ToBase64String($bytes)
+
+	$headers = @{
+		"Authorization"="basic $base64"
+		"Content-Type"="application/json"
+		"Accept"="application/json"
+		}
+		
+	$ProjectUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName"
+	$Getrequests = Invoke-WebRequest -Uri $ProjectUrl -Method GET -Headers $headers -SkipCertificateCheck
+	$json = $Getrequests.Content | Out-String | ConvertFrom-Json
+	$jsonVPC = [pscustomobject]@{
+            "resource_type" = "Vpc";
+            "display_name" = $VpcName;
+            "site_infos" = @(@{
+				"edge_cluster_paths" = @($SdkpolicyEdgeClusterPath)
+				"site_path" = "/infra/sites/default"
+			})
+			"default_gateway_path" = "/infra/tier-0s/$ProjectT0";
+			"service_gateway" = @{
+				"disable" = $false
+				"auto_snat" = $true;
+				}
+			"ip_address_type" = "IPV4";
+			"private_ipv4_blocks" = @("/orgs/default/projects/$ProjectName/infra/ip-blocks/$VpcProjectPRIVipBlockName");
+			"external_ipv4_blocks" = @("/infra/ip-blocks/$ProjectPUBipblockName");
+			"dhcp_config" = @{
+				"enable_dhcp" = $true;
+				"dns_client_config" = @{
+					"dns_server_ips" = @(
+						$VMDNS)
+				}
+				}
+			}	
+	$bodyVPC = $jsonVPC | ConvertTo-Json -Depth 10
+	$VpcUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName/vpcs/$VpcName"
+	
+	$PatchVPCrequests = Invoke-WebRequest -Uri $VpcUrl -Body $bodyVPC -Method PATCH -Headers $headers -SkipCertificateCheck
+}
+
+if($deployVpcSubnetPublic -eq 1) {
+
+My-Logger "Add $VpcName public subnet $VpcPublicSubnet via API call"
+
+$pair = "${NSXAdminUsername}:${NSXAdminPassword}"
+$bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+$base64 = [System.Convert]::ToBase64String($bytes)
+
+$headers = @{
+    "Authorization"="basic $base64"
+    "Content-Type"="application/json"
+    "Accept"="application/json"
+}
+
+$ProjectUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName/vpcs/$VpcName"	
+
+$Getrequests = Invoke-WebRequest -Uri $ProjectUrl -Method GET -Headers $headers -SkipCertificateCheck
+
+$json = $Getrequests.Content | Out-String | ConvertFrom-Json
+
+$jsonVPCsubnet = [pscustomobject]@{
+            "resource_type" = "VpcSubnet";
+			"description" = "This is test VpcSubnet"
+            "display_name" = $VpcPublicSubnet;
+			"access_mode" = "Public"
+			"ip_addresses" = @($VpcPublicSubnetIpaddresses)
+			"ipv4_subnet_size" = $VpcPublicSubnetSize
+}
+
+$bodyVPCsubnet = $jsonVPCsubnet | ConvertTo-Json -Depth 10
+
+$VpcSubnetUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName/vpcs/$VpcName/subnets/$VpcPublicSubnet"
+
+$PatchVPCrequests = Invoke-WebRequest -Uri $VpcSubnetUrl -Body $bodyVPCsubnet -Method PATCH -Headers $headers -SkipCertificateCheck
+
+}
+
+if($deployVpcSubnetPrivate -eq 1) {
+
+My-Logger "Add $VpcName private subnet $VpcPrivateSubnet via API call"
+
+$pair = "${NSXAdminUsername}:${NSXAdminPassword}"
+$bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+$base64 = [System.Convert]::ToBase64String($bytes)
+
+$headers = @{
+    "Authorization"="basic $base64"
+    "Content-Type"="application/json"
+    "Accept"="application/json"
+}
+
+$ProjectUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName/vpcs/$VpcName"	
+
+$Getrequests = Invoke-WebRequest -Uri $ProjectUrl -Method GET -Headers $headers -SkipCertificateCheck
+
+$json = $Getrequests.Content | Out-String | ConvertFrom-Json
+
+$jsonVPCsubnet = [pscustomobject]@{
+            "resource_type" = "VpcSubnet";
+			"description" = "This is test VpcSubnet"
+            "display_name" = $VpcPrivateSubnet;
+			"access_mode" = "Private"
+			"ip_addresses" = @($VpcPrivateSubnetIpaddresses)
+			"ipv4_subnet_size" = $VpcPrivateSubnetSize
+}
+
+$bodyVPCsubnet = $jsonVPCsubnet | ConvertTo-Json -Depth 10
+
+$VpcSubnetUrl = "https://$NSXTMgrHostname/policy/api/v1/orgs/default/projects/$ProjectName/vpcs/$VpcName/subnets/$VpcPrivateSubnet"
+
+$PatchVPCrequests = Invoke-WebRequest -Uri $VpcSubnetUrl -Body $bodyVPCsubnet -Method PATCH -Headers $headers -SkipCertificateCheck
+
+}
+
 
 $EndTime = Get-Date
 $duration = [math]::Round((New-TimeSpan -Start $StartTime -End $EndTime).TotalMinutes,2)
