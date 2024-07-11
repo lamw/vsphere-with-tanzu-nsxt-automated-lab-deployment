@@ -76,7 +76,7 @@ You are now ready to get your K8s on! 😁
     * [vCenter Server Appliance 7.0 Update 1 Build 17491101](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=VC70U1D&productId=974&rPId=60903)
     * [NSX-T Unified Appliance 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
     * [NSX-T Edge 3.1 OVA - Build 17483185](https://my.vmware.com/web/vmware/downloads/details?downloadGroup=NSX-T-311&productId=982&rPId=59399)
-    * [Nested ESXi 7.0 Update 1 OVA - Build 15344619](https://download3.vmware.com/software/vmw-tools/nested-esxi/Nested_ESXi7.0u1_Appliance_Template_v1.ova)
+    * [Nested ESXi 7.0 Update 1 OVA - Build 15344619](https://community.broadcom.com/flings)
 
 ## FAQ
 
